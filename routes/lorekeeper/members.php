@@ -226,10 +226,10 @@ Route::group(['prefix' => 'comments', 'namespace' => 'Comments'], function () {
     Route::get('/liked', 'CommentController@getLikedComments');
 });
 
-/**************************************************************************************************	
+/**************************************************************************************************
     Foraging
-**************************************************************************************************/	
-Route::group(['prefix' => 'foraging', 'namespace' => 'Users'], function() {
+**************************************************************************************************/
+Route::group(['prefix' => 'foraging', 'namespace' => 'Users'], function () {
     Route::get('/', 'ForagingController@getIndex');
     Route::post('/forage/{id}', 'ForagingController@postForage');
     Route::post('/claim', 'ForagingController@postClaim');
