@@ -2,7 +2,6 @@
 
 namespace App\Models\Loot;
 
-use App\Models\Item\Item;
 use App\Models\Model;
 
 class LootTable extends Model {
@@ -109,8 +108,7 @@ class LootTable extends Model {
      *
      * @return \Illuminate\Support\Collection
      */
-    public function roll($quantity = 1)
-    {
+    public function roll($quantity = 1) {
         return rollRewards($this->loot, $quantity);
     }
 }
