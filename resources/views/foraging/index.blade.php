@@ -1,6 +1,8 @@
 @extends('home.layout')
 
-@section('home-title') Foraging @endsection
+@section('home-title')
+    Foraging
+@endsection
 
 @section('home-content')
     {!! breadcrumbs(['Foraging' => 'foraging']) !!}
@@ -15,18 +17,18 @@
             <p>
                 Goods will be claimable after you return from scavenging! Usually, about
                 {{-- convert integer to minutes using carbon (multiple integer by 60) --}}
-                {{ config('lorekeeper.foraging.forage_time') . ' minute' . (config('lorekeeper.foraging.forage_time') > 1 ? 's' : '')}}
+                {{ config('lorekeeper.foraging.forage_time') . ' minute' . (config('lorekeeper.foraging.forage_time') > 1 ? 's' : '') }}
                 is the amount of time it takes to check out an area.
             </p>
-            @if($user->foraging->foraged_at)
+            @if ($user->foraging->foraged_at)
                 <p>
                     Last Foraged: {!! pretty_date($user->foraging->foraged_at) !!}
-                <br>
+                    <br>
                     Foraging Stamina Left: {{ $user->foraging->stamina }}
                 </p>
             @endif
         </div>
-        @if(config('lorekeeper.foraging.use_characters') && !$user->foraging->distribute_at)
+        @if (config('lorekeeper.foraging.use_characters') && !$user->foraging->distribute_at)
             <div class="col-md-6 justify-content-center text-center">
                 <h3>Current Character</h3>
                 @if (!$user->foraging->character)
@@ -46,8 +48,8 @@
                     </div>
                 @endif
                 {!! Form::open(['url' => 'foraging/edit/character']) !!}
-                    {!! Form::select('character_id', $characters, $user->foraging->character_id, ['class' => 'form-control m-1', 'placeholder' => 'None Selected']) !!}
-                    {!! Form::submit('Select Character', ['class' => 'btn btn-primary mb-2']) !!}
+                {!! Form::select('character_id', $characters, $user->foraging->character_id, ['class' => 'form-control m-1', 'placeholder' => 'None Selected']) !!}
+                {!! Form::submit('Select Character', ['class' => 'btn btn-primary mb-2']) !!}
                 {!! Form::close() !!}
             </div>
         @endif
@@ -79,14 +81,14 @@
                 var time = new Date(diff);
 
                 var seconds = time.getUTCSeconds();
-                if(seconds < 10) seconds = "0" + seconds;
+                if (seconds < 10) seconds = "0" + seconds;
 
                 var minutes = time.getUTCMinutes();
-                if(minutes < 10) minutes = "0" + minutes;
+                if (minutes < 10) minutes = "0" + minutes;
 
                 var hours = now.getUTCHours();
 
-                if((seconds == '00' && minutes == '00' && hours >= date.getUTCHours()) || hours > date.getUTCHours()) {
+                if ((seconds == '00' && minutes == '00' && hours >= date.getUTCHours()) || hours > date.getUTCHours()) {
                     // reload page
                     location.reload();
                 }
@@ -97,14 +99,14 @@
         }
     </script>
 
-    @if($user->foraging->distribute_at && $user->foraging->distribute_at > $now)
-        {{-- Whilst foraging is in progress--}}
+    @if ($user->foraging->distribute_at && $user->foraging->distribute_at > $now)
+        {{-- Whilst foraging is in progress --}}
         <script>
             // we have to check for safari since it doesn't agree with formatted times
             const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-            var timeLeft = Date.parse("<?php echo $user->foraging->distribute_at ?>");
+            var timeLeft = Date.parse("<?php echo $user->foraging->distribute_at; ?>");
             // if not safari, set off the loop!
-            if(!isSafari) setInterval(timeCount(timeLeft), 1000);
+            if (!isSafari) setInterval(timeCount(timeLeft), 1000);
         </script>
         <div class="container text-center">
             @if (config('lorekeeper.foraging.use_characters') && $user->foraging->character)
@@ -116,7 +118,7 @@
                 </div>
             @endif
             <div id="time">Foraging complete in {{ $diff < 1 ? 'less than a minute' : $diff }}</div>
-            <p>Started {!! pretty_date($user->foraging->foraged_at)!!}
+            <p>Started {!! pretty_date($user->foraging->foraged_at) !!}
         </div>
     @elseif($user->foraging->distribute_at <= $now && $user->foraging->forage_id)
         {{-- When foraging is done and we can claim --}}
@@ -128,45 +130,44 @@
                     </a>
                 </div>
             @endif
-            {!! Form::open(['url' => 'foraging/claim' ]) !!}
-                @if($user->foraging->forage->imageUr)
-                    <img src="{{ $user->foraging->forage->imageUrl }}" class="mb-2" style="max-width: 30%;"/>
-                    <br>
-                @endif
-                {!! $user->foraging->forage->fancyDisplayName !!}
+            {!! Form::open(['url' => 'foraging/claim']) !!}
+            @if ($user->foraging->forage->imageUr)
+                <img src="{{ $user->foraging->forage->imageUrl }}" class="mb-2" style="max-width: 30%;" />
                 <br>
-                {!! Form::submit('Claim Reward' , ['class' => 'btn btn-primary m-2']) !!}
+            @endif
+            {!! $user->foraging->forage->fancyDisplayName !!}
+            <br>
+            {!! Form::submit('Claim Reward', ['class' => 'btn btn-primary m-2']) !!}
             {!! Form::close() !!}
         </div>
     @elseif($user->foraging->stamina > 0)
         {{-- Base State --}}
-        @if(!count($tables))
+        @if (!count($tables))
             <p>No active forages. Come back soon!</p>
         @else
-        <div class="row text-center justify-content-center">
-            @foreach($tables->sortByDesc('is_visible') as $table)
-                <div class="col-md-4">
-                    {!! Form::open(['url' => 'foraging/forage/'.$table->id ]) !!}
+            <div class="row text-center justify-content-center">
+                @foreach ($tables->sortByDesc('is_visible') as $table)
+                    <div class="col-md-4">
+                        {!! Form::open(['url' => 'foraging/forage/' . $table->id]) !!}
                         <div>
-                            <img src="{{ $table->imageUrl }}" class="img-fluid mb-2"/>
+                            <img src="{{ $table->imageUrl }}" class="img-fluid mb-2" />
                         </div>
                         <div>
-                            {!! Form::button(($table->isVisible ? '' : '<i class="fas fa-crown"></i> ') . 'Forage in the ' . $table->display_name , 
-                            ['class' => 'btn btn-primary m-2', 'type' => 'submit']) !!}
+                            {!! Form::button(($table->isVisible ? '' : '<i class="fas fa-crown"></i> ') . 'Forage in the ' . $table->display_name, ['class' => 'btn btn-primary m-2', 'type' => 'submit']) !!}
                         </div>
 
                         <div class="alert alert-info pb-0">
                             <ul style="list-style: none;">
-                                <li>This forage costs {{$table->stamina_cost}} stamina.</li>
-                                @if($table->has_cost)
+                                <li>This forage costs {{ $table->stamina_cost }} stamina.</li>
+                                @if ($table->has_cost)
                                     <li>This forage costs {!! $table->currency->display($table->currency_quantity) !!}.</li>
                                 @endif
                             </ul>
                         </div>
-                    {!! Form::close() !!}
-                </div>
-            @endforeach
-        </div>
+                        {!! Form::close() !!}
+                    </div>
+                @endforeach
+            </div>
         @endif
     @else
         <div class="alert alert-info">
