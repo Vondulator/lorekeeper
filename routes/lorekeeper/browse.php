@@ -200,8 +200,7 @@ Route::get('time', function () {
     World Expansion
 **************************************************************************************************/
 
-Route::group(['prefix' => 'world', 'namespace' => 'WorldExpansion'], function() {
-
+Route::group(['prefix' => 'world', 'namespace' => 'WorldExpansion'], function () {
     Route::get('info', 'WorldExpansionController@getIndex');
     Route::get('glossary', 'WorldExpansionController@getGlossary');
 
