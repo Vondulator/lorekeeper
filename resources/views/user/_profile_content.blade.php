@@ -139,13 +139,17 @@
             @endif
             @if ($user_enabled && $user->home_id)
                 <div class="row no-gutters col-sm-5">
-                    <div class="col-lg-3 col-md-3 col-4"><h5>Home</h5></div>
+                    <div class="col-lg-3 col-md-3 col-4">
+                        <h5>Home</h5>
+                    </div>
                     <div class="col-lg-9 col-md-9 col-8">{!! $user->home ? $user->home->fullDisplayName : '<em>Deleted location</em>' !!}</div>
                 </div>
             @endif
             @if ($user_factions_enabled && $user->faction_id)
                 <div class="row no-gutters col-sm-7">
-                    <div class="col-md-4 col-4"><h5>Faction</h5></div>
+                    <div class="col-md-4 col-4">
+                        <h5>Faction</h5>
+                    </div>
                     <div class="col-md-8 col-8">{!! $user->faction ? $user->faction->fullDisplayName : '<em>Deleted faction</em>' !!}{{ $user->factionRank ? ' (' . $user->factionRank->name . ')' : '' }}</div>
                 </div>
             @endif

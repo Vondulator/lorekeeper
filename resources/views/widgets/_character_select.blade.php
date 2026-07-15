@@ -6,7 +6,12 @@
         ->pluck('fullName', 'slug')
         ->toArray();
     $tables = \App\Models\Loot\LootTable::orderBy('name')->pluck('name', 'id');
-    $characterAwards = $characterAwards ?? \App\Models\Award\Award::released()->where('is_character_owned', 1)->orderBy('name')->pluck('name', 'id');
+    $characterAwards =
+        $characterAwards ??
+        \App\Models\Award\Award::released()
+            ->where('is_character_owned', 1)
+            ->orderBy('name')
+            ->pluck('name', 'id');
 @endphp
 
 <div id="characterComponents" class="hide">
