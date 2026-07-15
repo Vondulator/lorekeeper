@@ -158,6 +158,10 @@
 
 @section('scripts')
     @parent
-    <script>$(function() { $('.selectize').selectize(); });</script>
+    <script>
+        $(function() {
+            $('.selectize').selectize();
+        });
+    </script>
     @include('js._website_links_js')
 @endsection

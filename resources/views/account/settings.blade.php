@@ -65,7 +65,9 @@
     @if ($user_enabled == 1 || (Auth::user()->isStaff && $user_enabled == 2))
         <div class="card p-3 mb-2">
             <h3>Home Location <small class="text-muted">({{ ucfirst($location_interval) }})</small></h3>
-            @if ($char_enabled == 1)<div class="alert alert-warning">Your characters share your home location.</div>@endif
+            @if ($char_enabled == 1)
+                <div class="alert alert-warning">Your characters share your home location.</div>
+            @endif
             @if (Auth::user()->canChangeLocation)
                 {!! Form::open(['url' => 'account/location']) !!}
                 {!! Form::select('location', [0 => 'Choose a Location'] + $locations, Auth::user()->home_id ?: 0, ['class' => 'form-control selectize mb-2']) !!}
@@ -80,7 +82,9 @@
     @if ($user_faction_enabled == 1 || (Auth::user()->isStaff && $user_faction_enabled == 2))
         <div class="card p-3 mb-2">
             <h3>Faction <small class="text-muted">({{ ucfirst($location_interval) }})</small></h3>
-            @if ($char_faction_enabled == 1)<div class="alert alert-warning">Your characters share your faction.</div>@endif
+            @if ($char_faction_enabled == 1)
+                <div class="alert alert-warning">Your characters share your faction.</div>
+            @endif
             @if (Auth::user()->canChangeFaction)
                 <p>Changing faction resets faction standing and removes special faction ranks.</p>
                 {!! Form::open(['url' => 'account/faction']) !!}
@@ -217,7 +221,11 @@
 
 @section('scripts')
     @parent
-    <script>$(function() { $('.selectize').selectize(); });</script>
+    <script>
+        $(function() {
+            $('.selectize').selectize();
+        });
+    </script>
     @if (Auth::user()->isStaff)
         @include('js._website_links_js')
     @endif
