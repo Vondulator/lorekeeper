@@ -4,15 +4,12 @@ namespace App\Http\Controllers\Characters;
 
 use App\Facades\Settings;
 use App\Http\Controllers\Controller;
-use App\Models\Character\Character;
-use App\Models\Character\CharacterCurrency;
-use App\Models\Character\CharacterItem;
 use App\Models\Award\Award;
 use App\Models\Award\AwardCategory;
+use App\Models\Character\Character;
 use App\Models\Character\CharacterAward;
-use App\Models\WorldExpansion\Faction;
-use App\Models\WorldExpansion\Location;
-use App\Models\User\UserAward;
+use App\Models\Character\CharacterCurrency;
+use App\Models\Character\CharacterItem;
 use App\Models\Character\CharacterProfile;
 use App\Models\Character\CharacterTransfer;
 use App\Models\Currency\Currency;
@@ -20,10 +17,13 @@ use App\Models\Gallery\GallerySubmission;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
 use App\Models\User\User;
+use App\Models\User\UserAward;
 use App\Models\User\UserCurrency;
 use App\Models\User\UserItem;
-use App\Services\CharacterManager;
+use App\Models\WorldExpansion\Faction;
+use App\Models\WorldExpansion\Location;
 use App\Services\AwardCaseManager;
+use App\Services\CharacterManager;
 use App\Services\CurrencyManager;
 use App\Services\DesignUpdateManager;
 use App\Services\InventoryManager;
@@ -162,10 +162,10 @@ class CharacterController extends Controller {
         }
 
         return view('character.edit_profile', [
-            'character' => $this->character,
-            'locations' => Location::where('is_character_home', 1)->pluck('style', 'id')->toArray(),
-            'factions' => Faction::where('is_character_faction', 1)->pluck('style', 'id')->toArray(),
-            'char_enabled' => Settings::get('WE_character_locations'),
+            'character'            => $this->character,
+            'locations'            => Location::where('is_character_home', 1)->pluck('style', 'id')->toArray(),
+            'factions'             => Faction::where('is_character_faction', 1)->pluck('style', 'id')->toArray(),
+            'char_enabled'         => Settings::get('WE_character_locations'),
             'char_faction_enabled' => Settings::get('WE_character_factions'),
         ]);
     }
@@ -562,6 +562,52 @@ class CharacterController extends Controller {
         return redirect()->back();
     }
 
+    public function getCharacterAwards($slug) {
+        $categories = AwardCategory::orderByDesc('sort')->get();
+        $awards = $this->character->awards()->where('count', '>', 0)->orderBy('name')->get()->groupBy(['award_category_id', 'id']);
+
+        return view('character.awards', [
+            'character'  => $this->character,
+            'categories' => $categories->keyBy('id'),
+            'awards'     => $awards,
+            'logs'       => $this->character->getAwardLogs(),
+        ] + (Auth::check() && (Auth::user()->hasPower('edit_inventories') || Auth::id() == $this->character->user_id) ? [
+            'awardOptions' => Award::where('is_character_owned', 1)->pluck('name', 'id'),
+            'page'         => 'character',
+        ] : []));
+    }
+
+    public function postAwardEdit(Request $request, AwardCaseManager $service, $slug) {
+        abort_unless(Auth::check(), 404);
+        if ($request->input('action') === 'give') {
+            $success = $service->transferCharacterStack(Auth::user(), $this->character, UserAward::find($request->input('stack_id')), $request->input('stack_quantity'));
+        } elseif ($request->input('action') === 'take') {
+            $success = $service->transferCharacterStack($this->character, $this->character->user, CharacterAward::find($request->input('ids')), $request->input('quantities'));
+        } elseif ($request->input('action') === 'delete') {
+            $success = $service->deleteStack($this->character, CharacterAward::find($request->input('ids')), $request->input('quantities'));
+        } else {
+            flash('Invalid action selected.')->error();
+
+            return redirect()->back();
+        }
+        if ($success) {
+            flash(ucfirst(__('awards.award')).' updated successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->back();
+    }
+
+    public function getCharacterAwardLogs($slug) {
+        return view('character.award_logs', [
+            'character' => $this->character,
+            'logs'      => $this->character->getAwardLogs(0),
+        ]);
+    }
+
     /**
      * Transfers inventory items back to a user.
      *
@@ -621,51 +667,5 @@ class CharacterController extends Controller {
         }
 
         return redirect()->back();
-    }
-
-    public function getCharacterAwards($slug) {
-        $categories = AwardCategory::orderByDesc('sort')->get();
-        $awards = $this->character->awards()->where('count', '>', 0)->orderBy('name')->get()->groupBy(['award_category_id', 'id']);
-
-        return view('character.awards', [
-            'character' => $this->character,
-            'categories' => $categories->keyBy('id'),
-            'awards' => $awards,
-            'logs' => $this->character->getAwardLogs(),
-        ] + (Auth::check() && (Auth::user()->hasPower('edit_inventories') || Auth::id() == $this->character->user_id) ? [
-            'awardOptions' => Award::where('is_character_owned', 1)->pluck('name', 'id'),
-            'page' => 'character',
-        ] : []));
-    }
-
-    public function postAwardEdit(Request $request, AwardCaseManager $service, $slug) {
-        abort_unless(Auth::check(), 404);
-        if ($request->input('action') === 'give') {
-            $success = $service->transferCharacterStack(Auth::user(), $this->character, UserAward::find($request->input('stack_id')), $request->input('stack_quantity'));
-        } elseif ($request->input('action') === 'take') {
-            $success = $service->transferCharacterStack($this->character, $this->character->user, CharacterAward::find($request->input('ids')), $request->input('quantities'));
-        } elseif ($request->input('action') === 'delete') {
-            $success = $service->deleteStack($this->character, CharacterAward::find($request->input('ids')), $request->input('quantities'));
-        } else {
-            flash('Invalid action selected.')->error();
-
-            return redirect()->back();
-        }
-        if ($success) {
-            flash(ucfirst(__('awards.award')).' updated successfully.')->success();
-        } else {
-            foreach ($service->errors()->getMessages()['error'] as $error) {
-                flash($error)->error();
-            }
-        }
-
-        return redirect()->back();
-    }
-
-    public function getCharacterAwardLogs($slug) {
-        return view('character.award_logs', [
-            'character' => $this->character,
-            'logs' => $this->character->getAwardLogs(0),
-        ]);
     }
 }

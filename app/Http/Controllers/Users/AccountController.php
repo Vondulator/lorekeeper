@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Users;
 
-use App\Http\Controllers\Controller;
 use App\Facades\Settings;
+use App\Http\Controllers\Controller;
 use App\Models\Notification;
+use App\Models\User\StaffProfile;
 use App\Models\User\User;
 use App\Models\User\UserAlias;
-use App\Models\User\StaffProfile;
 use App\Models\WorldExpansion\Faction;
 use App\Models\WorldExpansion\Location;
 use App\Services\LinkService;
@@ -67,14 +67,14 @@ class AccountController extends Controller {
      */
     public function getSettings() {
         return view('account.settings', [
-            'links' => Auth::user()->staffProfile,
-            'locations' => Location::where('is_user_home', 1)->pluck('style', 'id')->toArray(),
-            'factions' => Faction::where('is_user_faction', 1)->pluck('style', 'id')->toArray(),
-            'user_enabled' => Settings::get('WE_user_locations'),
+            'links'                => Auth::user()->staffProfile,
+            'locations'            => Location::where('is_user_home', 1)->pluck('style', 'id')->toArray(),
+            'factions'             => Faction::where('is_user_faction', 1)->pluck('style', 'id')->toArray(),
+            'user_enabled'         => Settings::get('WE_user_locations'),
             'user_faction_enabled' => Settings::get('WE_user_factions'),
-            'char_enabled' => Settings::get('WE_character_locations'),
+            'char_enabled'         => Settings::get('WE_character_locations'),
             'char_faction_enabled' => Settings::get('WE_character_factions'),
-            'location_interval' => [0 => 'whenever', 1 => 'yearly', 2 => 'quarterly', 3 => 'monthly', 4 => 'weekly', 5 => 'daily'][(int) Settings::get('WE_change_timelimit')],
+            'location_interval'    => [0 => 'whenever', 1 => 'yearly', 2 => 'quarterly', 3 => 'monthly', 4 => 'weekly', 5 => 'daily'][(int) Settings::get('WE_change_timelimit')],
         ]);
     }
 

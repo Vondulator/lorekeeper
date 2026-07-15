@@ -109,7 +109,7 @@ return [
 
     // Awards - Preimpression, TGI, Newt
     'awards' => [
-        'user_featured' => 1,
+        'user_featured'      => 1,
         'character_featured' => 1,
     ],
 ];

@@ -48,7 +48,7 @@ return [
         'description' => 'Allow rank to view the submissions queue, edit rewards attached to a submission and approve/reject them.',
     ],
     'manage_world' => [
-        'name' => 'Manage World',
+        'name'        => 'Manage World',
         'description' => 'Allow rank to edit information provided by the World Expansion extension.',
     ],
     'manage_reports'     => [

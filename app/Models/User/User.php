@@ -3,14 +3,13 @@
 namespace App\Models\User;
 
 use App\Facades\Settings;
-use App\Models\Character\Character;
 use App\Models\Award\Award;
 use App\Models\Award\AwardLog;
+use App\Models\Character\Character;
 use App\Models\Character\CharacterBookmark;
 use App\Models\Character\CharacterImageCreator;
-use App\Models\Comment\CommentLike;
 use App\Models\Collection\Collection;
-use App\Models\WorldExpansion\FactionRankMember;
+use App\Models\Comment\CommentLike;
 use App\Models\Currency\Currency;
 use App\Models\Currency\CurrencyLog;
 use App\Models\Gallery\GalleryCollaborator;
@@ -22,6 +21,7 @@ use App\Models\Notification;
 use App\Models\Rank\Rank;
 use App\Models\Shop\ShopLog;
 use App\Models\Submission\Submission;
+use App\Models\WorldExpansion\FactionRankMember;
 use App\Traits\Commenter;
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -416,21 +416,6 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->faction->ranks()->where('is_open', 1)->where('breakpoint', '<=', $standing->quantity ?? 0)->orderByDesc('breakpoint')->first();
     }
 
-    protected function canChangeWorldAssociation($changedAt) {
-        if (!$changedAt || !Settings::get('WE_change_timelimit')) {
-            return true;
-        }
-
-        return match ((int) Settings::get('WE_change_timelimit')) {
-            1 => !$changedAt->isSameYear(now()),
-            2 => $changedAt->year !== now()->year || $changedAt->quarter !== now()->quarter,
-            3 => !$changedAt->isSameMonth(now()),
-            4 => !$changedAt->isSameWeek(now()),
-            5 => !$changedAt->isSameDay(now()),
-            default => true,
-        };
-    }
-
     /**
      * Gets the user's last username change.
      *
@@ -808,5 +793,20 @@ class User extends Authenticatable implements MustVerifyEmail {
         return Collection::whereIn('id', $ids)->get()->filter(
             fn ($collection) => $reverse ? !$ownedIds->contains($collection->id) : $ownedIds->contains($collection->id)
         )->values();
+    }
+
+    protected function canChangeWorldAssociation($changedAt) {
+        if (!$changedAt || !Settings::get('WE_change_timelimit')) {
+            return true;
+        }
+
+        return match ((int) Settings::get('WE_change_timelimit')) {
+            1       => !$changedAt->isSameYear(now()),
+            2       => $changedAt->year !== now()->year || $changedAt->quarter !== now()->quarter,
+            3       => !$changedAt->isSameMonth(now()),
+            4       => !$changedAt->isSameWeek(now()),
+            5       => !$changedAt->isSameDay(now()),
+            default => true,
+        };
     }
 }

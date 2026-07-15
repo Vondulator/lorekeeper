@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admin\Users;
 
-use App\Http\Controllers\Controller;
 use App\Facades\Settings;
+use App\Http\Controllers\Controller;
 use App\Models\Rank\Rank;
 use App\Models\User\User;
 use App\Models\User\UserAlias;
@@ -83,15 +83,15 @@ class UserController extends Controller {
         }
 
         return view('admin.users.user', [
-            'user'  => $user,
-            'ranks' => Rank::orderBy('ranks.sort')->pluck('name', 'id')->toArray(),
-            'locations' => Location::where('is_user_home', 1)->pluck('style', 'id')->toArray(),
-            'factions' => Faction::where('is_user_faction', 1)->pluck('style', 'id')->toArray(),
-            'user_enabled' => Settings::get('WE_user_locations'),
+            'user'                 => $user,
+            'ranks'                => Rank::orderBy('ranks.sort')->pluck('name', 'id')->toArray(),
+            'locations'            => Location::where('is_user_home', 1)->pluck('style', 'id')->toArray(),
+            'factions'             => Faction::where('is_user_faction', 1)->pluck('style', 'id')->toArray(),
+            'user_enabled'         => Settings::get('WE_user_locations'),
             'user_faction_enabled' => Settings::get('WE_user_factions'),
-            'char_enabled' => Settings::get('WE_character_locations'),
+            'char_enabled'         => Settings::get('WE_character_locations'),
             'char_faction_enabled' => Settings::get('WE_character_factions'),
-            'location_interval' => [0 => 'whenever', 1 => 'yearly', 2 => 'quarterly', 3 => 'monthly', 4 => 'weekly', 5 => 'daily'][(int) Settings::get('WE_change_timelimit')],
+            'location_interval'    => [0 => 'whenever', 1 => 'yearly', 2 => 'quarterly', 3 => 'monthly', 4 => 'weekly', 5 => 'daily'][(int) Settings::get('WE_change_timelimit')],
         ]);
     }
 

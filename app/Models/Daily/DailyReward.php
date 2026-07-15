@@ -2,18 +2,16 @@
 
 namespace App\Models\Daily;
 
-use Config;
 use App\Models\Model;
 
-class DailyReward extends Model
-{
+class DailyReward extends Model {
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'daily_id', 'rewardable_type', 'rewardable_id', 'quantity', 'step'
+        'daily_id', 'rewardable_type', 'rewardable_id', 'quantity', 'step',
     ];
 
     /**
@@ -22,7 +20,7 @@ class DailyReward extends Model
      * @var string
      */
     protected $table = 'daily_rewards';
-    
+
     /**
      * Validation rules for creation.
      *
@@ -30,10 +28,10 @@ class DailyReward extends Model
      */
     public static $createRules = [
         'rewardable_type' => 'required',
-        'rewardable_id' => 'required',
-        'quantity' => 'required|integer|min:1',
+        'rewardable_id'   => 'required',
+        'quantity'        => 'required|integer|min:1',
     ];
-    
+
     /**
      * Validation rules for updating.
      *
@@ -41,23 +39,21 @@ class DailyReward extends Model
      */
     public static $updateRules = [
         'rewardable_type' => 'required',
-        'rewardable_id' => 'required',
-        'quantity' => 'required|integer|min:1',
+        'rewardable_id'   => 'required',
+        'quantity'        => 'required|integer|min:1',
     ];
 
     /**********************************************************************************************
-    
+
         RELATIONS
 
     **********************************************************************************************/
-    
+
     /**
      * Get the reward attached to the daily reward.
      */
-    public function reward() 
-    {
-        switch ($this->rewardable_type)
-        {
+    public function reward() {
+        switch ($this->rewardable_type) {
             case 'Item':
                 return $this->belongsTo('App\Models\Item\Item', 'rewardable_id');
                 break;
@@ -69,14 +65,15 @@ class DailyReward extends Model
             case 'LootTable':
                 return $this->belongsTo('App\Models\Loot\LootTable', 'rewardable_id');
                 break;
-            //uncomment if you use pets, may still have to edit the loot select blade files
-            /**case 'Pet':
-                return $this->belongsTo('App\Models\Pet\Pet', 'rewardable_id');**/
-            break;
+                // uncomment if you use pets, may still have to edit the loot select blade files
+                /**case 'Pet':
+                    return $this->belongsTo('App\Models\Pet\Pet', 'rewardable_id');**/
+                break;
             case 'Raffle':
                 return $this->belongsTo('App\Models\Raffle\Raffle', 'rewardable_id');
-            break;
+                break;
         }
+
         return null;
     }
 
@@ -84,8 +81,7 @@ class DailyReward extends Model
      * Gets the display image for the reward.
      */
     public function getRewardImageAttribute() {
-        switch ($this->rewardable_type)
-        {
+        switch ($this->rewardable_type) {
             case 'Item':
                 return (isset($this->reward()->first()->imageUrl)) ? $this->reward()->first()->imageUrl : '/images/inventory.png';
                 break;
@@ -96,15 +92,15 @@ class DailyReward extends Model
             case 'LootTable':
                 return '/images/loot.png';
                 break;
-            //uncomment if you use pets, may still have to edit the loot select blade files
-            /**case 'Pet':
-                return $this->belongsTo('App\Models\Pet\Pet', 'rewardable_id');**/
-            break;
+                // uncomment if you use pets, may still have to edit the loot select blade files
+                /**case 'Pet':
+                    return $this->belongsTo('App\Models\Pet\Pet', 'rewardable_id');**/
+                break;
             case 'Raffle':
                 return '/images/raffle.png';
-            break;
+                break;
         }
+
         return null;
     }
-
 }
