@@ -40,6 +40,20 @@
             </div>
         @endif
     @endif
+    @if (!$character->is_myo_slot && ($char_enabled == 2 || (Auth::user()->isStaff && $char_enabled == 3)))
+        <div class="form-group">
+            {!! Form::label('location', 'Home Location') !!}
+            {!! Form::select('location', [0 => 'No Location'] + $locations, $character->home_id ?: 0, ['class' => 'form-control selectize']) !!}
+        </div>
+    @endif
+
+    @if (!$character->is_myo_slot && ($char_faction_enabled == 2 || (Auth::user()->isStaff && $char_faction_enabled == 3)))
+        <div class="form-group">
+            {!! Form::label('faction', 'Faction') !!}
+            {!! Form::select('faction', [0 => 'No Faction'] + $factions, $character->faction_id ?: 0, ['class' => 'form-control selectize']) !!}
+        </div>
+    @endif
+
     <div class="form-group">
         {!! Form::label('text', 'Profile Content') !!}
         {!! Form::textarea('text', $character->profile->text, ['class' => 'wysiwyg form-control']) !!}

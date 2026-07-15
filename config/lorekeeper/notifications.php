@@ -348,6 +348,38 @@ return [
     ],
 
     // CHARACTER_ITEM_GRANT
+    341 => [
+        'name' => 'Award Grant',
+        'message' => 'You have earned {award_name} (×{award_quantity}). (<a href="{url}">View Awards</a>)',
+        'url' => 'awardcase',
+    ],
+    342 => [
+        'name' => 'Award Removal',
+        'message' => '{award_name} (×{award_quantity}) was removed from your awards by <a href="{sender_url}">{sender_name}</a>. (<a href="{url}">View Awards</a>)',
+        'url' => 'awardcase',
+    ],
+    343 => [
+        'name' => 'Award Transfer',
+        'message' => 'You received {award_name} (×{award_quantity}) from <a href="{sender_url}">{sender_name}</a>. (<a href="{url}">View Awards</a>)',
+        'url' => 'awardcase',
+    ],
+    344 => [
+        'name' => 'Forced Award Transfer',
+        'message' => '{award_name} (×{award_quantity}) was transferred by <a href="{sender_url}">{sender_name}</a>.',
+        'url' => 'awardcase',
+    ],
+    345 => [
+        'name' => 'Character Award Grant',
+        'message' => '{character_name} received {award_name} (×{award_quantity}) from <a href="{sender_url}">{sender_name}</a>. (<a href="{url}">View Awards</a>)',
+        'url' => 'character/{character_slug}/awards',
+    ],
+    346 => [
+        'name' => 'Character Award Removal',
+        'message' => '{award_name} (×{award_quantity}) was removed from {character_name} by <a href="{sender_url}">{sender_name}</a>. (<a href="{url}">View Awards</a>)',
+        'url' => 'character/{character_slug}/awards',
+    ],
+
+    // CHARACTER_ITEM_GRANT
     501 => [
         'name'    => 'Character Item Grant',
         'message' => '{character_name} has received a staff grant of {item_name} (×{item_quantity}) from <a href="{sender_url}">{sender_name}</a>. (<a href="{url}">View Inventory</a>)',

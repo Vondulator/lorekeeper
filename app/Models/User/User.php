@@ -2,10 +2,15 @@
 
 namespace App\Models\User;
 
+use App\Facades\Settings;
 use App\Models\Character\Character;
+use App\Models\Award\Award;
+use App\Models\Award\AwardLog;
 use App\Models\Character\CharacterBookmark;
 use App\Models\Character\CharacterImageCreator;
 use App\Models\Comment\CommentLike;
+use App\Models\Collection\Collection;
+use App\Models\WorldExpansion\FactionRankMember;
 use App\Models\Currency\Currency;
 use App\Models\Currency\CurrencyLog;
 use App\Models\Gallery\GalleryCollaborator;
@@ -35,7 +40,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      */
     protected $fillable = [
         'name', 'alias', 'rank_id', 'email', 'email_verified_at', 'password', 'is_news_unread', 'is_banned', 'has_alias', 'avatar', 'is_sales_unread', 'birthday',
-        'is_deactivated', 'deactivater_id',
+        'is_deactivated', 'deactivater_id', 'home_id', 'home_changed', 'faction_id', 'faction_changed',
     ];
 
     /**
@@ -55,6 +60,8 @@ class User extends Authenticatable implements MustVerifyEmail {
     protected $casts = [
         'email_verified_at' => 'datetime',
         'birthday'          => 'datetime',
+        'home_changed'      => 'datetime',
+        'faction_changed'   => 'datetime',
     ];
 
     /**
@@ -116,6 +123,11 @@ class User extends Authenticatable implements MustVerifyEmail {
      */
     public function profile() {
         return $this->hasOne(UserProfile::class);
+    }
+
+    /** Get this user's optional staff profile. */
+    public function staffProfile() {
+        return $this->hasOne(StaffProfile::class);
     }
 
     /**
@@ -352,6 +364,71 @@ class User extends Authenticatable implements MustVerifyEmail {
      */
     public function getDisplayNameAttribute() {
         return ($this->is_banned ? '<strike>' : '').'<a href="'.$this->url.'" class="display-user" style="'.($this->rank->color ? 'color: #'.$this->rank->color.';' : '').($this->is_deactivated ? 'opacity: 0.5;' : '').'"><i class="'.($this->rank->icon ? $this->rank->icon : 'fas fa-user').' mr-1" style="opacity: 50%;"></i>'.$this->name.'</a>'.($this->is_banned ? '</strike>' : '');
+    }
+
+    public function home() {
+        return $this->belongsTo(\App\Models\WorldExpansion\Location::class, 'home_id');
+    }
+
+    public function faction() {
+        return $this->belongsTo(\App\Models\WorldExpansion\Faction::class, 'faction_id');
+    }
+
+    /** Awards owned by this user. */
+    public function awards() {
+        return $this->belongsToMany(Award::class, 'user_awards')->withPivot('count', 'data', 'updated_at', 'id')->whereNull('user_awards.deleted_at');
+    }
+
+    /** Collections completed by this user. */
+    public function collections() {
+        return $this->belongsToMany(Collection::class, 'user_collections')->withPivot('id')->withTimestamps();
+    }
+
+    public function getIncompletedCollectionsAttribute() {
+        return Collection::visible()->whereNotIn('id', $this->collections()->pluck('collections.id'));
+    }
+
+    /** Display the linked user name followed by their pronouns when supplied. */
+    public function getDisplayNamePronounsAttribute() {
+        return $this->profile && $this->profile->pronouns
+            ? $this->displayName.' ('.$this->profile->pronouns.')'
+            : $this->displayName;
+    }
+
+    public function getCanChangeLocationAttribute() {
+        return $this->canChangeWorldAssociation($this->home_changed);
+    }
+
+    public function getCanChangeFactionAttribute() {
+        return $this->canChangeWorldAssociation($this->faction_changed);
+    }
+
+    public function getFactionRankAttribute() {
+        if (!$this->faction) {
+            return null;
+        }
+        $member = FactionRankMember::where('member_type', 'user')->where('member_id', $this->id)->first();
+        if ($member) {
+            return $member->rank;
+        }
+        $standing = $this->getCurrencies(true)->firstWhere('id', Settings::get('WE_faction_currency'));
+
+        return $this->faction->ranks()->where('is_open', 1)->where('breakpoint', '<=', $standing->quantity ?? 0)->orderByDesc('breakpoint')->first();
+    }
+
+    protected function canChangeWorldAssociation($changedAt) {
+        if (!$changedAt || !Settings::get('WE_change_timelimit')) {
+            return true;
+        }
+
+        return match ((int) Settings::get('WE_change_timelimit')) {
+            1 => !$changedAt->isSameYear(now()),
+            2 => $changedAt->year !== now()->year || $changedAt->quarter !== now()->quarter,
+            3 => !$changedAt->isSameMonth(now()),
+            4 => !$changedAt->isSameWeek(now()),
+            5 => !$changedAt->isSameDay(now()),
+            default => true,
+        };
     }
 
     /**
@@ -697,5 +774,39 @@ class User extends Authenticatable implements MustVerifyEmail {
      */
     public function hasBookmarked($character) {
         return CharacterBookmark::where('user_id', $this->id)->where('character_id', $character->id)->first();
+    }
+
+    public function getAwardLogs($limit = 10) {
+        $query = AwardLog::with(['award', 'sender', 'recipient'])
+            ->where(function ($query) {
+                $query->where('sender_type', 'User')->where('sender_id', $this->id)->whereNotIn('log_type', ['Staff Grant', 'Prompt Rewards', 'Claim Rewards']);
+            })->orWhere(function ($query) {
+                $query->where('recipient_type', 'User')->where('recipient_id', $this->id)->where('log_type', '!=', 'Staff Removal');
+            })->orderByDesc('id');
+
+        return $limit ? $query->limit($limit)->get() : $query->paginate(30);
+    }
+
+    public function getCollectionLogs($limit = 10) {
+        $query = UserCollectionLog::with(['collection', 'sender', 'recipient'])
+            ->where(function ($query) {
+                $query->where('sender_id', $this->id)->whereNotIn('log_type', ['Staff Grant', 'Prompt Rewards', 'Claim Rewards']);
+            })->orWhere(function ($query) {
+                $query->where('recipient_id', $this->id)->where('log_type', '!=', 'Staff Removal');
+            })->orderByDesc('id');
+
+        return $limit ? $query->limit($limit)->get() : $query->paginate(30);
+    }
+
+    public function hasCollection($collectionId) {
+        return $this->collections()->where('collections.id', $collectionId)->exists();
+    }
+
+    public function ownedCollections($ids, $reverse = false) {
+        $ownedIds = $this->collections()->pluck('collections.id');
+
+        return Collection::whereIn('id', $ids)->get()->filter(
+            fn ($collection) => $reverse ? !$ownedIds->contains($collection->id) : $ownedIds->contains($collection->id)
+        )->values();
     }
 }

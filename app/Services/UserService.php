@@ -12,6 +12,10 @@ use App\Models\Rank\Rank;
 use App\Models\Submission\Submission;
 use App\Models\Trade;
 use App\Models\User\User;
+use App\Models\User\StaffProfile;
+use App\Models\WorldExpansion\Faction;
+use App\Models\WorldExpansion\FactionRankMember;
+use App\Models\WorldExpansion\Location;
 use App\Models\User\UserUpdateLog;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -208,6 +212,102 @@ class UserService extends Service {
             $user->settings->save();
 
             return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    public function updateLocation($id, $user) {
+        DB::beginTransaction();
+
+        try {
+            $location = Location::find($id);
+            if (!$location || !$location->is_user_home) {
+                throw new \Exception('That location cannot be selected as a user home.');
+            }
+            if (!$user->canChangeLocation) {
+                throw new \Exception('You cannot change your location yet.');
+            }
+            $user->update(['home_id' => $location->id, 'home_changed' => now()]);
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    public function updateFaction($id, $user) {
+        DB::beginTransaction();
+
+        try {
+            $oldFactionId = $user->faction_id;
+            $faction = $id ? Faction::find($id) : null;
+            if ($id && (!$faction || !$faction->is_user_faction)) {
+                throw new \Exception('That faction cannot be joined by users.');
+            }
+            if (!$user->canChangeFaction) {
+                throw new \Exception('You cannot change your faction yet.');
+            }
+            $user->update(['faction_id' => $faction?->id, 'faction_changed' => now()]);
+
+            if ($oldFactionId !== $user->faction_id) {
+                $standing = $user->getCurrencies(true)->firstWhere('id', Settings::get('WE_faction_currency'));
+                if ($standing && $standing->quantity > 0 && !(new CurrencyManager)->debitCurrency($user, null, 'Changed Factions', null, $standing, $standing->quantity)) {
+                    throw new \Exception('Failed to reset faction standing.');
+                }
+                FactionRankMember::where('member_type', 'user')->where('member_id', $user->id)->delete();
+            }
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /** Update or create a staff member's public profile text. */
+    public function updateStaffProfile($data, $user) {
+        DB::beginTransaction();
+
+        try {
+            if (!$user->isStaff) {
+                throw new \Exception('You must be a current staff member to update a staff profile.');
+            }
+            $profile = StaffProfile::firstOrNew(['user_id' => $user->id]);
+            $profile->text = $data['text'] ?? null;
+            $profile->save();
+
+            return $this->commitReturn($profile);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /** Update or create a staff member's public contact links. */
+    public function updateStaffLinks($data, $user) {
+        DB::beginTransaction();
+
+        try {
+            if (!$user->isStaff) {
+                throw new \Exception('You must be a current staff member to update staff links.');
+            }
+            $sites = array_values(array_filter($data['site'] ?? [], fn ($site) => filled($site)));
+            $urls = array_values(array_filter($data['url'] ?? [], fn ($url) => filled($url)));
+            if (count($sites) !== count($urls)) {
+                throw new \Exception('Each staff contact needs both a website name and URL.');
+            }
+            $profile = StaffProfile::firstOrNew(['user_id' => $user->id]);
+            $profile->contacts = $sites ? json_encode(['site' => $sites, 'url' => $urls]) : null;
+            $profile->save();
+
+            return $this->commitReturn($profile);
         } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
         }

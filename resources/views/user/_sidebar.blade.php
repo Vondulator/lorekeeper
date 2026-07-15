@@ -17,14 +17,17 @@
         @endif
         <div class="sidebar-item"><a href="{{ $user->url . '/myos' }}" class="{{ set_active('user/' . $user->name . '/myos*') }}">MYO Slots</a></div>
         <div class="sidebar-item"><a href="{{ $user->url . '/inventory' }}" class="{{ set_active('user/' . $user->name . '/inventory*') }}">Inventory</a></div>
+        <div class="sidebar-item"><a href="{{ $user->url . '/' . __('awards.awardcase') }}" class="{{ set_active('user/' . $user->name . '/' . __('awards.awardcase') . '*') }}">{{ ucfirst(__('awards.awardcase')) }}</a></div>
         <div class="sidebar-item"><a href="{{ $user->url . '/bank' }}" class="{{ set_active('user/' . $user->name . '/bank*') }}">Bank</a></div>
     </li>
     <li class="sidebar-section">
         <div class="sidebar-section-header">History</div>
         <div class="sidebar-item"><a href="{{ $user->url . '/ownership' }}" class="{{ set_active('user/' . $user->name . '/ownership*') }}">Ownership History</a></div>
         <div class="sidebar-item"><a href="{{ $user->url . '/item-logs' }}" class="{{ set_active('user/' . $user->name . '/item-logs*') }}">Item Logs</a></div>
+        <div class="sidebar-item"><a href="{{ $user->url . '/' . __('awards.award') . '-logs' }}" class="{{ set_active('user/' . $user->name . '/' . __('awards.award') . '-logs*') }}">{{ ucfirst(__('awards.award')) }} Logs</a></div>
         <div class="sidebar-item"><a href="{{ $user->url . '/currency-logs' }}" class="{{ set_active('user/' . $user->name . '/currency-logs*') }}">Currency Logs</a></div>
         <div class="sidebar-item"><a href="{{ $user->url . '/submissions' }}" class="{{ set_active('user/' . $user->name . '/submissions*') }}">Submissions</a></div>
+        <div class="sidebar-item"><a href="{{ $user->url . '/collection-logs' }}" class="{{ set_active('user/' . $user->name . '/collection-logs*') }}">Collection Logs</a></div>
     </li>
 
     @if (Auth::check() && Auth::user()->hasPower('edit_user_info'))

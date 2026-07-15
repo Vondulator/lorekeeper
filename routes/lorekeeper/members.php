@@ -23,8 +23,12 @@ Route::group(['prefix' => 'notifications', 'namespace' => 'Users'], function () 
 Route::group(['prefix' => 'account', 'namespace' => 'Users'], function () {
     Route::get('settings', 'AccountController@getSettings');
     Route::post('profile', 'AccountController@postProfile');
+    Route::post('staff-profile', 'AccountController@postStaffProfile');
+    Route::post('staff-links', 'AccountController@postStaffLinks');
     Route::post('password', 'AccountController@postPassword');
     Route::post('email', 'AccountController@postEmail');
+    Route::post('location', 'AccountController@postLocation');
+    Route::post('faction', 'AccountController@postFaction');
     Route::post('avatar', 'AccountController@postAvatar');
     Route::post('username', 'AccountController@postUsername');
     Route::get('aliases', 'AccountController@getAliases');
@@ -104,6 +108,7 @@ Route::group(['prefix' => 'character', 'namespace' => 'Characters'], function ()
     Route::post('{slug}/profile/edit', 'CharacterController@postEditCharacterProfile');
 
     Route::post('{slug}/inventory/edit', 'CharacterController@postInventoryEdit');
+    Route::post('{slug}/'.__('awards.awardcase').'/edit', 'CharacterController@postAwardEdit');
 
     Route::post('{slug}/bank/transfer', 'CharacterController@postCurrencyTransfer');
     Route::get('{slug}/transfer', 'CharacterController@getTransfer');
@@ -224,6 +229,25 @@ Route::group(['prefix' => 'comments', 'namespace' => 'Comments'], function () {
     Route::post('/{id}/feature', 'CommentController@feature')->name('comments.feature');
     Route::post('/{id}/like/{action}', 'CommentController@like')->name('comments.like');
     Route::get('/liked', 'CommentController@getLikedComments');
+});
+
+Route::group(['prefix' => __('dailies.dailies')], function () {
+    Route::middleware('throttle:1,0.02')->group(function () {
+        Route::post('{id}', 'DailyController@postRoll');
+    });
+});
+
+Route::group(['prefix' => __('awards.awardcase'), 'namespace' => 'Users'], function () {
+    Route::get('/', 'AwardCaseController@getIndex');
+    Route::post('edit', 'AwardCaseController@postEdit');
+    Route::post('claim/{id}', 'AwardCaseController@postClaimAward');
+    Route::get('selector', 'AwardCaseController@getSelector');
+});
+
+Route::group(['prefix' => 'collection', 'namespace' => 'Users'], function () {
+    Route::get('/', 'CollectionController@getIndex');
+    Route::get('complete/{id}', 'CollectionController@getCompleteCollection');
+    Route::post('complete/{id}', 'CollectionController@postCompleteCollection');
 });
 
 /**************************************************************************************************

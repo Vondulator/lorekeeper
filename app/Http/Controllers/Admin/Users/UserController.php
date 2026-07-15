@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Admin\Users;
 
 use App\Http\Controllers\Controller;
+use App\Facades\Settings;
 use App\Models\Rank\Rank;
 use App\Models\User\User;
 use App\Models\User\UserAlias;
 use App\Models\User\UserUpdateLog;
+use App\Models\WorldExpansion\Faction;
+use App\Models\WorldExpansion\Location;
 use App\Services\UserService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -82,6 +85,13 @@ class UserController extends Controller {
         return view('admin.users.user', [
             'user'  => $user,
             'ranks' => Rank::orderBy('ranks.sort')->pluck('name', 'id')->toArray(),
+            'locations' => Location::where('is_user_home', 1)->pluck('style', 'id')->toArray(),
+            'factions' => Faction::where('is_user_faction', 1)->pluck('style', 'id')->toArray(),
+            'user_enabled' => Settings::get('WE_user_locations'),
+            'user_faction_enabled' => Settings::get('WE_user_factions'),
+            'char_enabled' => Settings::get('WE_character_locations'),
+            'char_faction_enabled' => Settings::get('WE_character_factions'),
+            'location_interval' => [0 => 'whenever', 1 => 'yearly', 2 => 'quarterly', 3 => 'monthly', 4 => 'weekly', 5 => 'daily'][(int) Settings::get('WE_change_timelimit')],
         ]);
     }
 
@@ -207,6 +217,60 @@ class UserController extends Controller {
         if ($service->updateBirthday($formatDate, $user)) {
             UserUpdateLog::create(['staff_id' => Auth::user()->id, 'user_id' => $user->id, 'data' => json_encode($logData), 'type' => 'Birth Date Change']);
             flash('Birthday updated successfully!')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->back();
+    }
+
+    public function postUserLocation(Request $request, $name) {
+        $user = User::where('name', $name)->firstOrFail();
+        if (!Auth::user()->canEditRank($user->rank)) {
+            flash('You cannot edit a user with a higher rank.')->error();
+        } elseif ((new UserService)->updateLocation($request->input('location'), $user)) {
+            flash('Location updated successfully.')->success();
+        }
+
+        return redirect()->back();
+    }
+
+    public function postUserFaction(Request $request, $name) {
+        $user = User::where('name', $name)->firstOrFail();
+        if (!Auth::user()->canEditRank($user->rank)) {
+            flash('You cannot edit a user with a higher rank.')->error();
+        } elseif ((new UserService)->updateFaction($request->input('faction'), $user)) {
+            flash('Faction updated successfully.')->success();
+        }
+
+        return redirect()->back();
+    }
+
+    public function postStaffProfile(Request $request, $name) {
+        $user = User::where('name', $name)->firstOrFail();
+        $service = new UserService;
+        $oldText = optional($user->staffProfile)->text;
+        if ($service->updateStaffProfile($request->only(['text']), $user)) {
+            UserUpdateLog::create(['staff_id' => Auth::id(), 'user_id' => $user->id, 'data' => json_encode(['old_profile' => $oldText, 'new_profile' => $request->input('text')]), 'type' => 'Staff Profile Update']);
+            flash($name.'\'s staff profile updated successfully!')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->back();
+    }
+
+    public function postStaffLinks(Request $request, $name) {
+        $user = User::where('name', $name)->firstOrFail();
+        $service = new UserService;
+        $oldUrls = optional($user->staffProfile)->contacts['url'] ?? [];
+        if ($service->updateStaffLinks($request->only(['site', 'url']), $user)) {
+            UserUpdateLog::create(['staff_id' => Auth::id(), 'user_id' => $user->id, 'data' => json_encode(['old_urls' => $oldUrls, 'new_urls' => $request->input('url', [])]), 'type' => 'Staff Links Update']);
+            flash($name.'\'s staff profile links updated successfully!')->success();
         } else {
             foreach ($service->errors()->getMessages()['error'] as $error) {
                 flash($error)->error();

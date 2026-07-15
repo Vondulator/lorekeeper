@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
+use App\Facades\Settings;
 use App\Models\Character\Character;
 use App\Models\Character\CharacterImage;
 use App\Models\Character\Sublist;
+use App\Models\Collection\CollectionCategory;
+use App\Models\Award\AwardCategory;
 use App\Models\Currency\Currency;
 use App\Models\Gallery\Gallery;
 use App\Models\Gallery\GalleryCharacter;
@@ -73,8 +76,12 @@ class UserController extends Controller {
             'user'       => $this->user,
             'name'       => $name,
             'items'      => $this->user->items()->where('count', '>', 0)->orderBy('user_items.updated_at', 'DESC')->take(4)->get(),
+            'collections' => $this->user->collections()->orderBy('user_collections.updated_at', 'DESC')->take(4)->get(),
+            'awards'      => $this->user->awards()->where('count', '>', 0)->orderBy('user_awards.updated_at', 'DESC')->take(4)->get(),
             'characters' => $characters,
             'aliases'    => $aliases->orderBy('is_primary_alias', 'DESC')->orderBy('site')->get(),
+            'user_enabled' => Settings::get('WE_user_locations'),
+            'user_factions_enabled' => Settings::get('WE_user_factions'),
         ]);
     }
 
@@ -300,6 +307,39 @@ class UserController extends Controller {
         return view('user.submission_logs', [
             'user' => $this->user,
             'logs' => $this->user->getSubmissions(Auth::check() ? Auth::user() : null),
+        ]);
+    }
+
+    /** Show a user's collection completion log. */
+    public function getUserCollectionLogs($name) {
+        $categories = CollectionCategory::orderByDesc('sort')->get();
+        $collections = $this->user->collections()->orderBy('name')->get()->groupBy(['collection_category_id', 'id']);
+
+        return view('user.collection_logs', [
+            'user' => $this->user,
+            'logs' => $this->user->getCollectionLogs(0),
+            'categories' => $categories->keyBy('id'),
+            'collections' => $collections,
+        ]);
+    }
+
+    public function getUserAwardCase($name) {
+        $categories = AwardCategory::orderByDesc('sort')->get();
+        $awards = $this->user->awards()->where('count', '>', 0)->orderBy('name')->get()->groupBy(['award_category_id', 'id']);
+
+        return view('user.awardcase', [
+            'user' => $this->user,
+            'categories' => $categories->keyBy('id'),
+            'awards' => $awards,
+            'userOptions' => User::where('id', '!=', $this->user->id)->orderBy('name')->pluck('name', 'id')->toArray(),
+            'logs' => $this->user->getAwardLogs(),
+        ]);
+    }
+
+    public function getUserAwardLogs($name) {
+        return view('user.award_logs', [
+            'user' => $this->user,
+            'logs' => $this->user->getAwardLogs(0),
         ]);
     }
 

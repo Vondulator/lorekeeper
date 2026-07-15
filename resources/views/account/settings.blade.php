@@ -62,9 +62,44 @@
         </div>
     @endif
 
+    @if ($user_enabled == 1 || (Auth::user()->isStaff && $user_enabled == 2))
+        <div class="card p-3 mb-2">
+            <h3>Home Location <small class="text-muted">({{ ucfirst($location_interval) }})</small></h3>
+            @if ($char_enabled == 1)<div class="alert alert-warning">Your characters share your home location.</div>@endif
+            @if (Auth::user()->canChangeLocation)
+                {!! Form::open(['url' => 'account/location']) !!}
+                {!! Form::select('location', [0 => 'Choose a Location'] + $locations, Auth::user()->home_id ?: 0, ['class' => 'form-control selectize mb-2']) !!}
+                <div class="text-right">{!! Form::submit('Edit', ['class' => 'btn btn-primary']) !!}</div>
+                {!! Form::close() !!}
+            @else
+                <div class="alert alert-warning">You last changed your location on {!! format_date(Auth::user()->home_changed, false) !!}.</div>
+            @endif
+        </div>
+    @endif
+
+    @if ($user_faction_enabled == 1 || (Auth::user()->isStaff && $user_faction_enabled == 2))
+        <div class="card p-3 mb-2">
+            <h3>Faction <small class="text-muted">({{ ucfirst($location_interval) }})</small></h3>
+            @if ($char_faction_enabled == 1)<div class="alert alert-warning">Your characters share your faction.</div>@endif
+            @if (Auth::user()->canChangeFaction)
+                <p>Changing faction resets faction standing and removes special faction ranks.</p>
+                {!! Form::open(['url' => 'account/faction']) !!}
+                {!! Form::select('faction', [0 => 'No Faction'] + $factions, Auth::user()->faction_id ?: 0, ['class' => 'form-control selectize mb-2']) !!}
+                <div class="text-right">{!! Form::submit('Edit', ['class' => 'btn btn-primary']) !!}</div>
+                {!! Form::close() !!}
+            @else
+                <div class="alert alert-warning">You last changed your faction on {!! format_date(Auth::user()->faction_changed, false) !!}.</div>
+            @endif
+        </div>
+    @endif
+
     <div class="card p-3 mb-2">
         <h3>Profile</h3>
         {!! Form::open(['url' => 'account/profile']) !!}
+        <div class="form-group">
+            {!! Form::label('pronouns', 'Preferred Pronouns') !!} {!! add_help('Your preferred pronouns will be displayed in various places across the site. This field can be changed or removed at any time.') !!}
+            {!! Form::text('pronouns', Auth::user()->profile->pronouns, ['class' => 'form-control', 'maxlength' => 50]) !!}
+        </div>
         <div class="form-group">
             {!! Form::label('text', 'Profile Text') !!}
             {!! Form::textarea('text', Auth::user()->profile->text, ['class' => 'form-control wysiwyg']) !!}
@@ -74,6 +109,10 @@
         </div>
         {!! Form::close() !!}
     </div>
+
+    @if (Auth::user()->isStaff)
+        @include('widgets._staff_profile_form', ['user' => Auth::user(), 'adminView' => false])
+    @endif
 
     <div class="card p-3 mb-2">
         <h3>Birthday Publicity</h3>
@@ -174,4 +213,12 @@
             {!! Form::close() !!}
         @endif
     </div>
+@endsection
+
+@section('scripts')
+    @parent
+    <script>$(function() { $('.selectize').selectize(); });</script>
+    @if (Auth::user()->isStaff)
+        @include('js._website_links_js')
+    @endif
 @endsection

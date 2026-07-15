@@ -61,6 +61,8 @@ class Loot extends Model {
         switch ($this->rewardable_type) {
             case 'Item':
                 return $this->belongsTo(Item::class, 'rewardable_id');
+            case 'Award':
+                return $this->belongsTo(\App\Models\Award\Award::class, 'rewardable_id');
             case 'ItemRarity':
                 return $this->belongsTo(Item::class, 'rewardable_id');
             case 'Currency':

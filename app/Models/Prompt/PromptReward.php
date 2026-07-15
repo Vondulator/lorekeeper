@@ -63,6 +63,9 @@ class PromptReward extends Model {
             case 'Currency':
                 return $this->belongsTo(Currency::class, 'rewardable_id');
                 break;
+            case 'Award':
+                return $this->belongsTo(\App\Models\Award\Award::class, 'rewardable_id');
+                break;
             case 'LootTable':
                 return $this->belongsTo(LootTable::class, 'rewardable_id');
                 break;

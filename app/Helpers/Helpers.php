@@ -447,3 +447,19 @@ function prettyProfileName($url) {
         return $url;
     }
 }
+
+/** Group both sides of World Expansion's polymorphic attachments by model type. */
+function allAttachments($model) {
+    $totals = [];
+    foreach ([$model->attachments, $model->attachers] as $relations) {
+        foreach ($relations ?? [] as $relation) {
+            $attached = $relation->attachment ?? $relation->attacher;
+            if (!$attached) {
+                continue;
+            }
+            $totals[class_basename($attached)][$attached->getKey()] = $attached;
+        }
+    }
+
+    return collect($totals)->map(fn ($items) => array_values($items))->all();
+}

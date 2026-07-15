@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Character\CharacterCategory;
+use App\Models\Collection\Collection;
+use App\Models\Collection\CollectionCategory;
+use App\Models\Award\Award;
+use App\Models\Award\AwardCategory;
 use App\Models\Currency\Currency;
 use App\Models\Feature\Feature;
 use App\Models\Feature\FeatureCategory;
@@ -419,6 +423,110 @@ class WorldController extends Controller {
 
         return view('world.character_categories', [
             'categories' => $query->visible(Auth::check() ? Auth::user() : null)->orderBy('sort', 'DESC')->orderBy('id')->paginate(20)->appends($request->query()),
+        ]);
+    }
+
+    public function getCollections(Request $request) {
+        $query = Collection::visible();
+        if ($request->filled('name')) {
+            $query->where('name', 'LIKE', '%'.$request->input('name').'%');
+        }
+        if ($request->filled('collection_category_id') && $request->input('collection_category_id') !== 'none') {
+            $query->where('collection_category_id', $request->input('collection_category_id'));
+        }
+        match ($request->input('sort')) {
+            'alpha' => $query->sortAlphabetical(),
+            'alpha-reverse' => $query->sortAlphabetical(true),
+            'oldest' => $query->sortOldest(),
+            default => $query->sortNewest(),
+        };
+
+        return view('world.collections.collections', [
+            'collections' => $query->paginate(20)->appends($request->query()),
+            'categories' => ['none' => 'Any Category'] + CollectionCategory::orderByDesc('sort')->pluck('name', 'id')->toArray(),
+        ]);
+    }
+
+    public function getAwardCategories(Request $request) {
+        $query = AwardCategory::query();
+        if ($request->filled('name')) {
+            $query->where('name', 'LIKE', '%'.$request->input('name').'%');
+        }
+
+        return view('world.award_categories', [
+            'categories' => $query->orderByDesc('sort')->paginate(20)->appends($request->query()),
+        ]);
+    }
+
+    public function getAwards(Request $request) {
+        $query = Award::with('category');
+        if ($request->filled('award_category_id') && $request->input('award_category_id') !== 'none') {
+            $query->where('award_category_id', $request->input('award_category_id'));
+        }
+        if ($request->filled('name')) {
+            $query->where('name', 'LIKE', '%'.$request->input('name').'%');
+        }
+        if ($request->input('ownership') === 'all') {
+            $query->where('is_character_owned', 1)->where('is_user_owned', 1);
+        } elseif ($request->input('ownership') === 'character') {
+            $query->where('is_character_owned', 1)->where('is_user_owned', 0);
+        } elseif ($request->input('ownership') === 'user') {
+            $query->where('is_character_owned', 0)->where('is_user_owned', 1);
+        }
+        match ($request->input('sort')) {
+            'alpha-reverse' => $query->sortAlphabetical(true),
+            'category' => $query->sortCategory(),
+            'newest' => $query->sortNewest(),
+            'oldest' => $query->sortOldest(),
+            default => $query->sortAlphabetical(),
+        };
+        if (!Auth::check() || !Auth::user()->isStaff) {
+            $query->released();
+        }
+
+        return view('world.awards', [
+            'awards' => $query->paginate(20)->appends($request->query()),
+            'categories' => ['none' => 'Any Category'] + AwardCategory::orderByDesc('sort')->pluck('name', 'id')->toArray(),
+            'shops' => Shop::orderByDesc('sort')->get(),
+        ]);
+    }
+
+    public function getAward($id) {
+        $query = Award::whereKey($id);
+        if (!Auth::check() || !Auth::user()->isStaff) {
+            $query->released();
+        }
+        $award = $query->firstOrFail();
+
+        return view('world.award_page', [
+            'award' => $award,
+            'imageUrl' => $award->imageUrl,
+            'name' => $award->displayName,
+            'description' => $award->parsed_description,
+            'categories' => AwardCategory::orderByDesc('sort')->get()->keyBy('id'),
+            'shops' => Shop::orderByDesc('sort')->get(),
+        ]);
+    }
+
+    public function getCollection($id) {
+        $collection = Collection::visible()->findOrFail($id);
+
+        return view('world.collections._collection_page', [
+            'collection' => $collection,
+            'imageUrl' => $collection->imageUrl,
+            'name' => $collection->displayName,
+            'description' => $collection->parsed_description,
+        ]);
+    }
+
+    public function getCollectionCategories(Request $request) {
+        $query = CollectionCategory::query();
+        if ($request->filled('name')) {
+            $query->where('name', 'LIKE', '%'.$request->input('name').'%');
+        }
+
+        return view('world.collection_categories', [
+            'categories' => $query->orderByDesc('sort')->paginate(20)->appends($request->query()),
         ]);
     }
 }

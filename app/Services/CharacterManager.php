@@ -12,6 +12,7 @@ use App\Models\Character\CharacterDesignUpdate;
 use App\Models\Character\CharacterFeature;
 use App\Models\Character\CharacterImage;
 use App\Models\Character\CharacterTransfer;
+use App\Models\WorldExpansion\FactionRankMember;
 use App\Models\Sales\SalesCharacter;
 use App\Models\Species\Subtype;
 use App\Models\User\User;
@@ -1307,6 +1308,22 @@ class CharacterManager extends Service {
             // Update the character's profile
             if (!$character->is_myo_slot) {
                 $character->name = $data['name'];
+            }
+            $character->save();
+
+            if (array_key_exists('location', $data)) {
+                $character->home_id = $data['location'] ?: null;
+            }
+            if (array_key_exists('faction', $data)) {
+                $oldFactionId = $character->faction_id;
+                $character->faction_id = $data['faction'] ?: null;
+                if ($oldFactionId !== $character->faction_id) {
+                    $standing = $character->getCurrencies(true)->firstWhere('id', Settings::get('WE_faction_currency'));
+                    if ($standing && $standing->quantity > 0 && !(new CurrencyManager)->debitCurrency($character, null, 'Changed Factions', null, $standing, $standing->quantity)) {
+                        throw new \Exception('Failed to reset faction standing.');
+                    }
+                    FactionRankMember::where('member_type', 'character')->where('member_id', $character->id)->delete();
+                }
             }
             $character->save();
 
