@@ -31,6 +31,8 @@ class Kernel extends ConsoleKernel {
             ->daily();
         $schedule->command('reset-foraging')
             ->daily();
+        $schedule->command('update-timed-daily')
+            ->everyMinute();
     }
 
     /**

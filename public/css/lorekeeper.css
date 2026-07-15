@@ -2,6 +2,10 @@
     --btn-faded : transparent;
 }
 
+.collectionnotunlocked {
+    opacity: 0.4;
+}
+
 /**************************************************************************************************
 
     Font definitions

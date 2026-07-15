@@ -40,8 +40,14 @@
                             <a class="dropdown-item" href="{{ url('inventory') }}">
                                 Inventory
                             </a>
+                            <a class="dropdown-item" href="{{ url(__('awards.awardcase')) }}">
+                                {{ ucfirst(__('awards.awardcase')) }}
+                            </a>
                             <a class="dropdown-item" href="{{ url('bank') }}">
                                 Bank
+                            </a>
+                            <a class="dropdown-item" href="{{ url('collection') }}">
+                                Collections
                             </a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="{{ url('comments/liked') }}">
@@ -110,11 +116,17 @@
                         <a class="dropdown-item" href="{{ url('world') }}">
                             Encyclopedia
                         </a>
+                        <a class="dropdown-item" href="{{ url('world/info') }}">
+                            World Expanded
+                        </a>
                         <a class="dropdown-item" href="{{ url('prompts/prompts') }}">
                             Prompts
                         </a>
                         <a class="dropdown-item" href="{{ url('shops') }}">
                             Shops
+                        </a>
+                        <a class="dropdown-item" href="{{ url(__('dailies.dailies')) }}">
+                            {{ ucfirst(__('dailies.dailies')) }}
                         </a>
                         <a class="dropdown-item" href="{{ url('foraging') }}">
                             Foraging

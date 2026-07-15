@@ -112,6 +112,10 @@ return [
                 'name' => 'Item Grants',
                 'url'  => 'admin/grants/items',
             ],
+            [
+                'name' => 'Award Grants',
+                'url'  => 'admin/grants/awards',
+            ],
         ],
     ],
     'Foraging' => [
@@ -160,6 +164,14 @@ return [
                 'url'  => 'admin/data/galleries',
             ],
             [
+                'name' => 'Award Categories',
+                'url'  => 'admin/data/award-categories',
+            ],
+            [
+                'name' => 'Awards',
+                'url'  => 'admin/data/awards',
+            ],
+            [
                 'name' => 'Character Categories',
                 'url'  => 'admin/data/character-categories',
             ],
@@ -188,6 +200,10 @@ return [
                 'url'  => 'admin/data/shops',
             ],
             [
+                'name' => 'Dailies',
+                'url'  => 'admin/data/dailies',
+            ],
+            [
                 'name' => 'Currencies',
                 'url'  => 'admin/data/currencies',
             ],
@@ -203,6 +219,23 @@ return [
                 'name' => 'Items',
                 'url'  => 'admin/data/items',
             ],
+            [
+                'name' => 'Collections',
+                'url'  => 'admin/data/collections',
+            ],
+        ],
+    ],
+    'World Expanded' => [
+        'power' => 'manage_world',
+        'links' => [
+            ['name' => 'Glossary', 'url' => 'admin/world/glossary'],
+            ['name' => 'Locations', 'url' => 'admin/world/locations'],
+            ['name' => 'Fauna', 'url' => 'admin/world/faunas'],
+            ['name' => 'Flora', 'url' => 'admin/world/floras'],
+            ['name' => 'Events', 'url' => 'admin/world/events'],
+            ['name' => 'Figures', 'url' => 'admin/world/figures'],
+            ['name' => 'Factions', 'url' => 'admin/world/factions'],
+            ['name' => 'Concepts', 'url' => 'admin/world/concepts'],
         ],
     ],
     'Raffles'    => [

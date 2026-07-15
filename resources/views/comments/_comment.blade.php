@@ -22,6 +22,9 @@
                         {!! $comment->commenter->commentDisplayName !!} @if ($comment->commenter->isStaff == true)
                             <small class="text-success">Staff Member</small>
                         @endif
+                        @if ($comment->commenter->profile && $comment->commenter->profile->pronouns)
+                            <small class="text-secondary">{{ $comment->commenter->profile->pronouns }}</small>
+                        @endif
                     </h5>
                     @if ($comment->is_featured)
                         <div class="ml-1 text-muted text-right col-6 mx-0 pr-1"><small class="text-success">Featured by Owner</small></div>

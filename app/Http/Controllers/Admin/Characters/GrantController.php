@@ -7,10 +7,23 @@ use App\Models\Character\Character;
 use App\Models\Currency\Currency;
 use App\Services\CurrencyManager;
 use App\Services\InventoryManager;
+use App\Services\AwardCaseManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class GrantController extends Controller {
+    public function postCharacterAwards($slug, Request $request, AwardCaseManager $service) {
+        if ($service->grantCharacterAwards($request->only(['award_ids', 'quantities', 'data', 'disallow_transfer', 'notes']), Character::where('slug', $slug)->firstOrFail(), Auth::user())) {
+            flash(ucfirst(__('awards.awards')).' granted successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->back();
+    }
+
     /**
      * Grants or removes currency from a character.
      *

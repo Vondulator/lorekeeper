@@ -9,6 +9,7 @@
     $currencies = \App\Models\Currency\Currency::where('is_user_owned', 1)
         ->orderBy('name')
         ->pluck('name', 'id');
+    $awards = $awards ?? \App\Models\Award\Award::orderBy('name')->pluck('name', 'id');
     if ($showLootTables) {
         $tables = \App\Models\Loot\LootTable::orderBy('name')->pluck('name', 'id');
     }
@@ -36,7 +37,7 @@
         @if ($loots)
             @foreach ($loots as $loot)
                 <tr class="loot-row">
-                    <td>{!! Form::select('rewardable_type[]', ['Item' => 'Item', 'Currency' => 'Currency'] + ($showLootTables ? ['LootTable' => 'Loot Table'] : []) + ($showRaffles ? ['Raffle' => 'Raffle Ticket'] : []), $loot->rewardable_type, [
+                    <td>{!! Form::select('rewardable_type[]', ['Item' => 'Item', 'Currency' => 'Currency', 'Award' => ucfirst(__('awards.award'))] + ($showLootTables ? ['LootTable' => 'Loot Table'] : []) + ($showRaffles ? ['Raffle' => 'Raffle Ticket'] : []), $loot->rewardable_type, [
                         'class' => 'form-control reward-type',
                         'placeholder' => 'Select Reward Type',
                     ]) !!}</td>
@@ -45,6 +46,8 @@
                             {!! Form::select('rewardable_id[]', $items, $loot->rewardable_id, ['class' => 'form-control item-select selectize', 'placeholder' => 'Select Item']) !!}
                         @elseif($loot->rewardable_type == 'Currency')
                             {!! Form::select('rewardable_id[]', $currencies, $loot->rewardable_id, ['class' => 'form-control currency-select selectize', 'placeholder' => 'Select Currency']) !!}
+                        @elseif($loot->rewardable_type == 'Award')
+                            {!! Form::select('rewardable_id[]', $awards, $loot->rewardable_id, ['class' => 'form-control award-select selectize', 'placeholder' => 'Select ' . ucfirst(__('awards.award'))]) !!}
                         @elseif($showLootTables && $loot->rewardable_type == 'LootTable')
                             {!! Form::select('rewardable_id[]', $tables, $loot->rewardable_id, ['class' => 'form-control table-select selectize', 'placeholder' => 'Select Loot Table']) !!}
                         @elseif($showRaffles && $loot->rewardable_type == 'Raffle')

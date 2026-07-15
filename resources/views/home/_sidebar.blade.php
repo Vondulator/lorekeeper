@@ -5,6 +5,7 @@
         <div class="sidebar-item"><a href="{{ url('characters') }}" class="{{ set_active('characters') }}">My Characters</a></div>
         <div class="sidebar-item"><a href="{{ url('characters/myos') }}" class="{{ set_active('characters/myos') }}">My MYO Slots</a></div>
         <div class="sidebar-item"><a href="{{ url('inventory') }}" class="{{ set_active('inventory*') }}">Inventory</a></div>
+        <div class="sidebar-item"><a href="{{ url(__('awards.awardcase')) }}" class="{{ set_active(__('awards.awardcase') . '*') }}">{{ ucfirst(__('awards.awardcase')) }}</a></div>
         <div class="sidebar-item"><a href="{{ url('bank') }}" class="{{ set_active('bank*') }}">Bank</a></div>
     </li>
     <li class="sidebar-section">
@@ -13,6 +14,7 @@
         <div class="sidebar-item"><a href="{{ url('claims') }}" class="{{ set_active('claims*') }}">Claims</a></div>
         <div class="sidebar-item"><a href="{{ url('characters/transfers/incoming') }}" class="{{ set_active('characters/transfers*') }}">Character Transfers</a></div>
         <div class="sidebar-item"><a href="{{ url('trades/open') }}" class="{{ set_active('trades/open*') }}">Trades</a></div>
+        <div class="sidebar-item"><a href="{{ url('collection') }}" class="{{ set_active('collection*') }}">Collections</a></div>
         <div class="sidebar-item"><a href="{{ url('comments/liked') }}" class="{{ set_active('comments/liked*') }}">Liked Comments</a></div>
     </li>
     <li class="sidebar-section">

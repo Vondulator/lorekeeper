@@ -25,7 +25,7 @@ class GallerySubmission extends Model {
         'title', 'description', 'parsed_description',
         'prompt_id', 'data', 'is_visible', 'status',
         'vote_data', 'staff_id', 'is_valued',
-        'staff_comments', 'parsed_staff_comments',
+        'staff_comments', 'parsed_staff_comments', 'location_id',
     ];
 
     /**
@@ -143,6 +143,10 @@ class GallerySubmission extends Model {
      */
     public function prompt() {
         return $this->belongsTo(Prompt::class);
+    }
+
+    public function location() {
+        return $this->belongsTo(\App\Models\WorldExpansion\Location::class, 'location_id');
     }
 
     /**
@@ -513,6 +517,14 @@ class GallerySubmission extends Model {
         // Only returns submissions which are viewable to everyone,
         // but given that this is for the sake of public display, that's fine
         return Prompt::whereIn('id', $this->promptSubmissions->pluck('prompt_id'))->get();
+    }
+
+    public function getLocationSubmissionsAttribute() {
+        return Submission::viewable()->whereNotNull('location_id')->where('url', $this->url)->get();
+    }
+
+    public function getLocationsAttribute() {
+        return \App\Models\WorldExpansion\Location::whereIn('id', $this->locationSubmissions->pluck('location_id'))->get();
     }
 
     /**

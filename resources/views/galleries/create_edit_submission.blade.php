@@ -96,6 +96,15 @@
                     {!! $submission->prompt_id ? '<p><strong>Prompt:</strong> ' . $submission->prompt->displayName . '</p>' : '' !!}
                 @endif
 
+                @if ($gallery->location_selection == 1 && (!$submission->id || Auth::user()->hasPower('manage_submissions')))
+                    <div class="form-group">
+                        {!! Form::label('location_id', ($submission->id && Auth::user()->hasPower('manage_submissions') ? '[Admin] ' : '') . 'Location (Optional)') !!} {!! add_help('Associates this gallery submission with a world location. Users cannot change it after creation.') !!}
+                        {!! Form::select('location_id', $locations, $submission->location_id ?? old('location_id'), ['class' => 'form-control selectize', 'id' => 'location', 'placeholder' => 'Select a Location']) !!}
+                    </div>
+                @elseif ($submission->location_id)
+                    <p><strong>Location:</strong> {!! $submission->location->displayName !!}</p>
+                @endif
+
                 @if ($submission->id && Auth::user()->hasPower('manage_submissions'))
                     <div class="form-group">
                         {!! Form::label('gallery_id', '[Admin] Gallery / Move Submission') !!} {!! add_help(

@@ -54,6 +54,28 @@
         {!! Form::close() !!}
     </div>
 
+    @include('widgets._staff_profile_form', ['user' => $user, 'links' => $user->staffProfile, 'adminView' => true])
+
+    @if ($user_enabled)
+        <div class="card p-3 mb-2">
+            <h3>Home Location</h3>
+            {!! Form::open(['url' => 'admin/users/' . $user->name . '/location']) !!}
+            {!! Form::select('location', [0 => 'Choose a Location'] + $locations, $user->home_id ?: 0, ['class' => 'form-control selectize mb-2']) !!}
+            <div class="text-right">{!! Form::submit('Edit', ['class' => 'btn btn-primary']) !!}</div>
+            {!! Form::close() !!}
+        </div>
+    @endif
+
+    @if ($user_faction_enabled)
+        <div class="card p-3 mb-2">
+            <h3>Faction</h3>
+            {!! Form::open(['url' => 'admin/users/' . $user->name . '/faction']) !!}
+            {!! Form::select('faction', [0 => 'No Faction'] + $factions, $user->faction_id ?: 0, ['class' => 'form-control selectize mb-2']) !!}
+            <div class="text-right">{!! Form::submit('Edit', ['class' => 'btn btn-primary']) !!}</div>
+            {!! Form::close() !!}
+        </div>
+    @endif
+
     <div class="card p-3 mb-2">
         <h3>Account</h3>
         {!! Form::open(['url' => 'admin/users/' . $user->name . '/account']) !!}
@@ -132,4 +154,10 @@
             <p>No aliases found.</p>
         @endif
     </div>
+@endsection
+
+@section('scripts')
+    @parent
+    <script>$(function() { $('.selectize').selectize(); });</script>
+    @include('js._website_links_js')
 @endsection

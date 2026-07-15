@@ -6,6 +6,7 @@
         ->pluck('fullName', 'slug')
         ->toArray();
     $tables = \App\Models\Loot\LootTable::orderBy('name')->pluck('name', 'id');
+    $characterAwards = $characterAwards ?? \App\Models\Award\Award::released()->where('is_character_owned', 1)->orderBy('name')->pluck('name', 'id');
 @endphp
 
 <div id="characterComponents" class="hide">
@@ -54,7 +55,7 @@
 
             @if ($expanded_rewards)
                 <td>
-                    {!! Form::select('character_rewardable_type[]', ['Item' => 'Item', 'Currency' => 'Currency'] + (isset($showLootTables) && $showLootTables ? ['LootTable' => 'Loot Table'] : []), null, [
+                    {!! Form::select('character_rewardable_type[]', ['Item' => 'Item', 'Currency' => 'Currency', 'Award' => ucfirst(__('awards.award'))] + (isset($showLootTables) && $showLootTables ? ['LootTable' => 'Loot Table'] : []), null, [
                         'class' => 'form-control character-rewardable-type',
                         'placeholder' => 'Select Reward Type',
                     ]) !!}
@@ -62,6 +63,7 @@
                 <td class="lootDivs">
                     <div class="character-currencies hide">{!! Form::select('character_currency_id[]', $characterCurrencies, 0, ['class' => 'form-control character-currency-id', 'placeholder' => 'Select Currency']) !!}</div>
                     <div class="character-items hide">{!! Form::select('character_item_id[]', $items, 0, ['class' => 'form-control character-item-id', 'placeholder' => 'Select Item']) !!}</div>
+                    <div class="character-awards hide">{!! Form::select('character_award_id[]', $characterAwards, 0, ['class' => 'form-control character-award-id', 'placeholder' => 'Select ' . ucfirst(__('awards.award'))]) !!}</div>
                     @if (isset($showLootTables) && $showLootTables)
                         <div class="character-loots hide">{!! Form::select('character_rewardable_id[]', $tables, 0, ['class' => 'form-control character-rtable-id', 'placeholder' => 'Select Loot Table']) !!}</div>
                     @endif

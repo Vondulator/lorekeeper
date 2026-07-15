@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Users;
 use App\Facades\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\Character\Character;
+use App\Models\Award\Award;
 use App\Models\Currency\Currency;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
@@ -96,6 +97,8 @@ class SubmissionController extends Controller {
             'categories'          => ItemCategory::visible(Auth::check() ? Auth::user() : null)->orderBy('sort', 'DESC')->get(),
             'item_filter'         => Item::orderBy('name')->released()->get()->keyBy('id'),
             'items'               => Item::orderBy('name')->released()->pluck('name', 'id'),
+            'awards'              => Award::released()->where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
+            'characterAwards'     => Award::released()->where('is_character_owned', 1)->orderBy('name')->pluck('name', 'id'),
             'character_items'     => Item::whereIn('item_category_id', ItemCategory::where('is_character_owned', 1)->pluck('id')->toArray())->orderBy('name')->released()->pluck('name', 'id'),
             'currencies'          => Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
             'inventory'           => $inventory,
@@ -129,6 +132,8 @@ class SubmissionController extends Controller {
             'categories'          => ItemCategory::orderBy('sort', 'DESC')->get(),
             'item_filter'         => Item::orderBy('name')->released()->get()->keyBy('id'),
             'items'               => Item::orderBy('name')->released()->pluck('name', 'id'),
+            'awards'              => Award::released()->where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
+            'characterAwards'     => Award::released()->where('is_character_owned', 1)->orderBy('name')->pluck('name', 'id'),
             'character_items'     => Item::whereIn('item_category_id', ItemCategory::where('is_character_owned', 1)->pluck('id')->toArray())->orderBy('name')->released()->pluck('name', 'id'),
             'currencies'          => Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
             'inventory'           => $inventory,
@@ -360,6 +365,8 @@ class SubmissionController extends Controller {
             'inventory'           => $inventory,
             'item_filter'         => Item::orderBy('name')->released()->get()->keyBy('id'),
             'items'               => Item::orderBy('name')->released()->pluck('name', 'id'),
+            'awards'              => Award::released()->where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
+            'characterAwards'     => Award::released()->where('is_character_owned', 1)->orderBy('name')->pluck('name', 'id'),
             'currencies'          => Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
             'raffles'             => Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
             'page'                => 'submission',
@@ -393,6 +400,8 @@ class SubmissionController extends Controller {
             'currencies'            => Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
             'item_filter'           => Item::orderBy('name')->released()->get()->keyBy('id'),
             'items'                 => Item::orderBy('name')->released()->pluck('name', 'id'),
+            'awards'                => Award::released()->where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
+            'characterAwards'       => Award::released()->where('is_character_owned', 1)->orderBy('name')->pluck('name', 'id'),
             'inventory'             => $inventory,
             'raffles'               => Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
             'page'                  => 'submission',

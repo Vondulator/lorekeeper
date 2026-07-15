@@ -144,6 +144,12 @@ class Notification extends Model {
     public const REPORT_CLOSED = 221;
     public const COMMENT_MADE = 239;
     public const COMMENT_REPLY = 240;
+    public const AWARD_GRANT = 341;
+    public const AWARD_REMOVAL = 342;
+    public const AWARD_TRANSFER = 343;
+    public const FORCED_AWARD_TRANSFER = 344;
+    public const CHARACTER_AWARD_GRANT = 345;
+    public const CHARACTER_AWARD_REMOVAL = 346;
     public const CHARACTER_ITEM_GRANT = 501;
     public const CHARACTER_ITEM_REMOVAL = 502;
     public const GALLERY_SUBMISSION_COLLABORATOR = 505;

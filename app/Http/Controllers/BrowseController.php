@@ -9,6 +9,7 @@ use App\Models\Character\CharacterImage;
 use App\Models\Character\Sublist;
 use App\Models\Feature\Feature;
 use App\Models\Rank\Rank;
+use App\Models\Rank\RankPower;
 use App\Models\Rarity;
 use App\Models\Species\Species;
 use App\Models\Species\Subtype;
@@ -660,6 +661,21 @@ class BrowseController extends Controller {
             'sublist'     => $sublist,
             'sublists'    => Sublist::orderBy('sort', 'DESC')->get(),
             'userOptions' => User::query()->orderBy('name')->pluck('name', 'id')->toArray(),
+        ]);
+    }
+
+    /** Show public profiles for all staff grouped by rank. */
+    public function getTeamIndex() {
+        $rankIds = RankPower::query()->distinct()->pluck('rank_id');
+        $admin = User::find(Settings::get('admin_user'));
+        if ($admin) {
+            $rankIds->push($admin->rank_id);
+        }
+        $rankIds = $rankIds->unique()->values();
+
+        return view('browse.team_index', [
+            'staff' => User::whereIn('rank_id', $rankIds)->orderBy('name')->get()->groupBy('rank_id'),
+            'ranks' => Rank::whereIn('id', $rankIds)->orderByDesc('sort')->get()->keyBy('id'),
         ]);
     }
 }

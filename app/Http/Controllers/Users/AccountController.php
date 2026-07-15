@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
+use App\Facades\Settings;
 use App\Models\Notification;
 use App\Models\User\User;
 use App\Models\User\UserAlias;
+use App\Models\User\StaffProfile;
+use App\Models\WorldExpansion\Faction;
+use App\Models\WorldExpansion\Location;
 use App\Services\LinkService;
 use App\Services\UserService;
 use BaconQrCode\Renderer\Color\Rgb;
@@ -62,7 +66,16 @@ class AccountController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getSettings() {
-        return view('account.settings');
+        return view('account.settings', [
+            'links' => Auth::user()->staffProfile,
+            'locations' => Location::where('is_user_home', 1)->pluck('style', 'id')->toArray(),
+            'factions' => Faction::where('is_user_faction', 1)->pluck('style', 'id')->toArray(),
+            'user_enabled' => Settings::get('WE_user_locations'),
+            'user_faction_enabled' => Settings::get('WE_user_factions'),
+            'char_enabled' => Settings::get('WE_character_locations'),
+            'char_faction_enabled' => Settings::get('WE_character_factions'),
+            'location_interval' => [0 => 'whenever', 1 => 'yearly', 2 => 'quarterly', 3 => 'monthly', 4 => 'weekly', 5 => 'daily'][(int) Settings::get('WE_change_timelimit')],
+        ]);
     }
 
     /**
@@ -72,10 +85,63 @@ class AccountController extends Controller {
      */
     public function postProfile(Request $request) {
         Auth::user()->profile->update([
+            'pronouns'    => $request->get('pronouns'),
             'text'        => $request->get('text'),
             'parsed_text' => parse($request->get('text')),
         ]);
         flash('Profile updated successfully.')->success();
+
+        return redirect()->back();
+    }
+
+    /** Update the authenticated user's staff profile. */
+    public function postStaffProfile(Request $request, UserService $service) {
+        $request->validate(StaffProfile::$createRules);
+        if ($service->updateStaffProfile($request->only(['text']), Auth::user())) {
+            flash('Staff profile updated successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->back();
+    }
+
+    /** Update the authenticated user's staff contact links. */
+    public function postStaffLinks(Request $request, UserService $service) {
+        $request->validate(StaffProfile::$createRules);
+        if ($service->updateStaffLinks($request->only(['site', 'url']), Auth::user())) {
+            flash('Staff links updated successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->back();
+    }
+
+    public function postLocation(Request $request, UserService $service) {
+        if ($service->updateLocation($request->input('location'), Auth::user())) {
+            flash('Location updated successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->back();
+    }
+
+    public function postFaction(Request $request, UserService $service) {
+        if ($service->updateFaction($request->input('faction'), Auth::user())) {
+            flash('Faction updated successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
 
         return redirect()->back();
     }

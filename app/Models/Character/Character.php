@@ -3,6 +3,10 @@
 namespace App\Models\Character;
 
 use App\Facades\Notifications;
+use App\Facades\Settings;
+use App\Models\Award\Award;
+use App\Models\Award\AwardLog;
+use App\Models\WorldExpansion\FactionRankMember;
 use App\Models\Currency\Currency;
 use App\Models\Currency\CurrencyLog;
 use App\Models\Gallery\GalleryCharacter;
@@ -32,7 +36,7 @@ class Character extends Model {
         'is_sellable', 'is_tradeable', 'is_giftable',
         'sale_value', 'transferrable_at', 'is_visible',
         'is_gift_art_allowed', 'is_gift_writing_allowed', 'is_trading', 'sort',
-        'is_myo_slot', 'name', 'trade_id', 'owner_url',
+        'is_myo_slot', 'name', 'trade_id', 'owner_url', 'home_id', 'home_changed', 'faction_id', 'faction_changed',
     ];
 
     /**
@@ -49,6 +53,8 @@ class Character extends Model {
      */
     protected $casts = [
         'transferrable_at' => 'datetime',
+        'home_changed' => 'datetime',
+        'faction_changed' => 'datetime',
     ];
 
     /**
@@ -191,6 +197,19 @@ class Character extends Model {
      */
     public function items() {
         return $this->belongsToMany(Item::class, 'character_items')->withPivot('count', 'data', 'updated_at', 'id', 'stack_name')->whereNull('character_items.deleted_at');
+    }
+
+    public function home() {
+        return $this->belongsTo(\App\Models\WorldExpansion\Location::class, 'home_id');
+    }
+
+    public function faction() {
+        return $this->belongsTo(\App\Models\WorldExpansion\Faction::class, 'faction_id');
+    }
+
+    /** Awards owned by this character. */
+    public function awards() {
+        return $this->belongsToMany(Award::class, 'character_awards')->withPivot('count', 'data', 'updated_at', 'id')->whereNull('character_awards.deleted_at');
     }
 
     /**********************************************************************************************
@@ -470,6 +489,54 @@ class Character extends Model {
         } else {
             return $query->paginate(30);
         }
+    }
+
+    public function getHomeSettingAttribute() {
+        return (int) Settings::get('WE_character_locations');
+    }
+
+    public function getLocationAttribute() {
+        return match ($this->homeSetting) {
+            1 => optional(optional($this->user)->home)->fullDisplayName,
+            2, 3 => optional($this->home)->fullDisplayName,
+            default => null,
+        };
+    }
+
+    public function getFactionSettingAttribute() {
+        return (int) Settings::get('WE_character_factions');
+    }
+
+    public function getCurrentFactionAttribute() {
+        return match ($this->factionSetting) {
+            1 => optional(optional($this->user)->faction)->fullDisplayName,
+            2, 3 => optional($this->faction)->fullDisplayName,
+            default => null,
+        };
+    }
+
+    public function getFactionRankAttribute() {
+        if (!$this->faction) {
+            return null;
+        }
+        $member = FactionRankMember::where('member_type', 'character')->where('member_id', $this->id)->first();
+        if ($member) {
+            return $member->rank;
+        }
+        $standing = $this->getCurrencies(true)->firstWhere('id', Settings::get('WE_faction_currency'));
+
+        return $this->faction->ranks()->where('is_open', 1)->where('breakpoint', '<=', $standing->quantity ?? 0)->orderByDesc('breakpoint')->first();
+    }
+
+    public function getAwardLogs($limit = 10) {
+        $query = AwardLog::with(['award', 'sender', 'recipient'])
+            ->where(function ($query) {
+                $query->where('sender_type', 'Character')->where('sender_id', $this->id)->where('log_type', '!=', 'Staff Grant');
+            })->orWhere(function ($query) {
+                $query->where('recipient_type', 'Character')->where('recipient_id', $this->id)->where('log_type', '!=', 'Staff Removal');
+            })->orderByDesc('id');
+
+        return $limit ? $query->limit($limit)->get() : $query->paginate(30);
     }
 
     /**
