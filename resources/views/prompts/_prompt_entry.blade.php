@@ -65,6 +65,6 @@
             @else
                 <a href="{{ url('submissions/new?prompt_id=' . $prompt->id) }}" class="btn btn-primary">Submit Prompt</a>
             @endif
+        </div>
     </div>
-</div>
 </div>

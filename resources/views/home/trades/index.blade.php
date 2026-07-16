@@ -9,9 +9,9 @@
 
     <h1>
         Trades
-</h1>
+    </h1>
 
-<p>Here are your direct trades. Public trade listings can be viewed <a href="{{ url('trades/listings') }}">here</a>.</p>
+    <p>Here are your direct trades. Public trade listings can be viewed <a href="{{ url('trades/listings') }}">here</a>.</p>
 
     <div class="text-right">
         <a href="{{ url('trades/create') }}" class="btn btn-primary">New Trade</a>
