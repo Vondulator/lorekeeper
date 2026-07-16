@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Award\Award;
-use App\Models\Award\AwardCategory;
+use App\Facades\Settings;
 use App\Models\Character\CharacterCategory;
 use App\Models\Collection\Collection;
 use App\Models\Collection\CollectionCategory;
+use App\Models\Award\Award;
+use App\Models\Award\AwardCategory;
 use App\Models\Currency\Currency;
 use App\Models\Feature\Feature;
 use App\Models\Feature\FeatureCategory;
@@ -17,6 +18,8 @@ use App\Models\Shop\Shop;
 use App\Models\Species\Species;
 use App\Models\Species\Subtype;
 use App\Models\User\User;
+use App\Models\Weather\Weather;
+use App\Models\Weather\WeatherSeason;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -435,15 +438,15 @@ class WorldController extends Controller {
             $query->where('collection_category_id', $request->input('collection_category_id'));
         }
         match ($request->input('sort')) {
-            'alpha'         => $query->sortAlphabetical(),
+            'alpha' => $query->sortAlphabetical(),
             'alpha-reverse' => $query->sortAlphabetical(true),
-            'oldest'        => $query->sortOldest(),
-            default         => $query->sortNewest(),
+            'oldest' => $query->sortOldest(),
+            default => $query->sortNewest(),
         };
 
         return view('world.collections.collections', [
             'collections' => $query->paginate(20)->appends($request->query()),
-            'categories'  => ['none' => 'Any Category'] + CollectionCategory::orderByDesc('sort')->pluck('name', 'id')->toArray(),
+            'categories' => ['none' => 'Any Category'] + CollectionCategory::orderByDesc('sort')->pluck('name', 'id')->toArray(),
         ]);
     }
 
@@ -475,19 +478,19 @@ class WorldController extends Controller {
         }
         match ($request->input('sort')) {
             'alpha-reverse' => $query->sortAlphabetical(true),
-            'category'      => $query->sortCategory(),
-            'newest'        => $query->sortNewest(),
-            'oldest'        => $query->sortOldest(),
-            default         => $query->sortAlphabetical(),
+            'category' => $query->sortCategory(),
+            'newest' => $query->sortNewest(),
+            'oldest' => $query->sortOldest(),
+            default => $query->sortAlphabetical(),
         };
         if (!Auth::check() || !Auth::user()->isStaff) {
             $query->released();
         }
 
         return view('world.awards', [
-            'awards'     => $query->paginate(20)->appends($request->query()),
+            'awards' => $query->paginate(20)->appends($request->query()),
             'categories' => ['none' => 'Any Category'] + AwardCategory::orderByDesc('sort')->pluck('name', 'id')->toArray(),
-            'shops'      => Shop::orderByDesc('sort')->get(),
+            'shops' => Shop::orderByDesc('sort')->get(),
         ]);
     }
 
@@ -499,12 +502,12 @@ class WorldController extends Controller {
         $award = $query->firstOrFail();
 
         return view('world.award_page', [
-            'award'       => $award,
-            'imageUrl'    => $award->imageUrl,
-            'name'        => $award->displayName,
+            'award' => $award,
+            'imageUrl' => $award->imageUrl,
+            'name' => $award->displayName,
             'description' => $award->parsed_description,
-            'categories'  => AwardCategory::orderByDesc('sort')->get()->keyBy('id'),
-            'shops'       => Shop::orderByDesc('sort')->get(),
+            'categories' => AwardCategory::orderByDesc('sort')->get()->keyBy('id'),
+            'shops' => Shop::orderByDesc('sort')->get(),
         ]);
     }
 
@@ -512,9 +515,9 @@ class WorldController extends Controller {
         $collection = Collection::visible()->findOrFail($id);
 
         return view('world.collections._collection_page', [
-            'collection'  => $collection,
-            'imageUrl'    => $collection->imageUrl,
-            'name'        => $collection->displayName,
+            'collection' => $collection,
+            'imageUrl' => $collection->imageUrl,
+            'name' => $collection->displayName,
             'description' => $collection->parsed_description,
         ]);
     }
@@ -527,6 +530,31 @@ class WorldController extends Controller {
 
         return view('world.collection_categories', [
             'categories' => $query->orderByDesc('sort')->paginate(20)->appends($request->query()),
+        ]);
+    }
+
+    public function getSeasons(Request $request) {
+        $query = WeatherSeason::visible();
+        if ($request->filled('name')) {
+            $query->where('name', 'LIKE', '%'.$request->input('name').'%');
+        }
+
+        return view('world.seasons', ['seasons' => $query->orderBy('name')->paginate(20)->appends($request->query())]);
+    }
+
+    public function getWeather(Request $request) {
+        $query = Weather::visible();
+        if ($request->filled('name')) {
+            $query->where('name', 'LIKE', '%'.$request->input('name').'%');
+        }
+
+        return view('world.weathers', ['weathers' => $query->orderBy('name')->paginate(20)->appends($request->query())]);
+    }
+
+    public function getForecast() {
+        return view('world.forecast', [
+            'weather' => Weather::find(Settings::get('site_weather')),
+            'season'  => WeatherSeason::find(Settings::get('site_season')),
         ]);
     }
 }

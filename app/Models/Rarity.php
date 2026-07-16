@@ -9,7 +9,7 @@ class Rarity extends Model {
      * @var array
      */
     protected $fillable = [
-        'name', 'sort', 'color', 'has_image', 'description', 'parsed_description', 'hash',
+        'name', 'sort', 'color', 'has_image', 'description', 'parsed_description', 'hash', 'has_icon', 'icon_hash',
     ];
 
     /**
@@ -28,6 +28,7 @@ class Rarity extends Model {
         'color'       => 'nullable|regex:/^#?[0-9a-fA-F]{6}$/i',
         'description' => 'nullable',
         'image'       => 'mimes:png',
+        'icon'        => 'mimes:png',
     ];
 
     /**
@@ -40,6 +41,7 @@ class Rarity extends Model {
         'color'       => 'nullable|regex:/^#?[0-9a-fA-F]{6}$/i',
         'description' => 'nullable',
         'image'       => 'mimes:png',
+        'icon'        => 'mimes:png',
     ];
 
     /**********************************************************************************************
@@ -54,6 +56,12 @@ class Rarity extends Model {
      * @return string
      */
     public function getDisplayNameAttribute() {
+        $icon = $this->has_icon ? '<img class="small-icon" src="'.$this->rarityIconUrl.'" alt="" /> ' : '';
+
+        return $icon.$this->displayNameNoIcon;
+    }
+
+    public function getDisplayNameNoIconAttribute() {
         return '<a href="'.$this->url.'" class="display-rarity" '.($this->color ? 'style="color: #'.$this->color.';"' : '').'>'.$this->name.'</a>';
     }
 
@@ -140,5 +148,13 @@ class Rarity extends Model {
      */
     public function getAdminPowerAttribute() {
         return 'edit_data';
+    }
+
+    public function getRarityIconFileNameAttribute() {
+        return $this->icon_hash.$this->id.'-icon.png';
+    }
+
+    public function getRarityIconUrlAttribute() {
+        return $this->has_icon ? asset($this->imageDirectory.'/'.$this->rarityIconFileName) : null;
     }
 }

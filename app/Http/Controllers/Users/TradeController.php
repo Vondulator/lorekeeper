@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers\Users;
 
+use App\Facades\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\Character\CharacterCategory;
+use App\Models\Currency\Currency;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
 use App\Models\Trade;
+use App\Models\TradeListing;
 use App\Models\User\User;
 use App\Models\User\UserItem;
 use App\Services\TradeManager;
+use App\Services\TradeListingManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -154,7 +158,8 @@ class TradeController extends Controller {
      * @return \Illuminate\Http\RedirectResponse
      */
     public function postCreateTrade(Request $request, TradeManager $service) {
-        if ($trade = $service->createTrade($request->only(['recipient_id', 'comments', 'stack_id', 'stack_quantity', 'currency_id', 'currency_quantity', 'character_id']), Auth::user())) {
+        $request->validate(['terms_link' => 'nullable|url|max:200']);
+        if ($trade = $service->createTrade($request->only(['recipient_id', 'comments', 'stack_id', 'stack_quantity', 'currency_id', 'currency_quantity', 'character_id', 'terms_link']), Auth::user())) {
             flash('Trade created successfully.')->success();
 
             return redirect()->to($trade->url);
@@ -295,6 +300,75 @@ class TradeController extends Controller {
             flash('Trade canceled successfully.')->success();
 
             return redirect()->back();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->back();
+    }
+
+    public function getListingIndex() {
+        return view('home.trades.listings.index', [
+            'listings'       => TradeListing::active()->orderByDesc('id')->paginate(10),
+            'listingDuration' => Settings::get('trade_listing_duration'),
+        ]);
+    }
+
+    public function getExpiredListings() {
+        return view('home.trades.listings.expired', [
+            'listings'       => TradeListing::expired()->where('user_id', Auth::id())->orderByDesc('id')->paginate(10),
+            'listingDuration' => Settings::get('trade_listing_duration'),
+        ]);
+    }
+
+    public function getListing($id) {
+        $listing = TradeListing::findOrFail($id);
+
+        return view('home.trades.listings.view_listing', [
+            'listing'      => $listing,
+            'seekingData'  => isset($listing->data['seeking']) ? parseAssetData($listing->data['seeking']) : null,
+            'offeringData' => isset($listing->data['offering']) ? parseAssetData($listing->data['offering']) : null,
+            'items'        => Item::all()->keyBy('id'),
+        ]);
+    }
+
+    public function getCreateListing() {
+        $inventory = UserItem::with('item')->whereNull('deleted_at')->where('count', '>', 0)->where('user_id', Auth::id())->get()
+            ->filter(fn ($userItem) => $userItem->isTransferrable)->sortBy('item.name');
+
+        return view('home.trades.listings.create_listing', [
+            'items'               => Item::orderBy('name')->where('allow_transfer', 1)->pluck('name', 'id'),
+            'currencies'          => Currency::where('is_user_owned', 1)->where('allow_user_to_user', 1)->orderByDesc('sort_user')->get(),
+            'categories'          => ItemCategory::orderByDesc('sort')->get(),
+            'item_filter'         => Item::orderBy('name')->get()->keyBy('id'),
+            'inventory'           => $inventory,
+            'characters'          => Auth::user()->allCharacters()->visible()->tradable()->with('designUpdate')->get(),
+            'characterCategories' => CharacterCategory::orderByDesc('sort')->get(),
+            'page'                => 'listing',
+            'listingDuration'     => Settings::get('trade_listing_duration'),
+        ]);
+    }
+
+    public function postCreateListing(Request $request, TradeListingManager $service) {
+        $data = $request->only(['title', 'comments', 'contact', 'item_ids', 'quantities', 'stack_id', 'stack_quantity', 'offer_currency_ids', 'seeking_currency_ids', 'character_id', 'offering_etc', 'seeking_etc']);
+        if ($listing = $service->createTradeListing($data, Auth::user())) {
+            flash('Trade listing created successfully.')->success();
+
+            return redirect()->to($listing->url);
+        }
+        foreach ($service->errors()->getMessages()['error'] as $error) {
+            flash($error)->error();
+        }
+
+        return redirect()->back();
+    }
+
+    public function postExpireListing(Request $request, TradeListingManager $service, $id) {
+        TradeListing::findOrFail($id);
+        if ($service->markExpired(['id' => $id], Auth::user())) {
+            flash('Listing expired successfully.')->success();
         } else {
             foreach ($service->errors()->getMessages()['error'] as $error) {
                 flash($error)->error();

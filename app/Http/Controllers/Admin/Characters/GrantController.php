@@ -8,6 +8,7 @@ use App\Models\Currency\Currency;
 use App\Services\AwardCaseManager;
 use App\Services\CurrencyManager;
 use App\Services\InventoryManager;
+use App\Services\AwardCaseManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 

@@ -64,7 +64,7 @@
                 <span class="text-secondary">This prompt is not open for submissions yet.</span>
             @else
                 <a href="{{ url('submissions/new?prompt_id=' . $prompt->id) }}" class="btn btn-primary">Submit Prompt</a>
-            @endunless
+            @endif
     </div>
 </div>
 </div>

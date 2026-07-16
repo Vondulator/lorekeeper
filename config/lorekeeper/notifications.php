@@ -349,34 +349,34 @@ return [
 
     // CHARACTER_ITEM_GRANT
     341 => [
-        'name'    => 'Award Grant',
+        'name' => 'Award Grant',
         'message' => 'You have earned {award_name} (×{award_quantity}). (<a href="{url}">View Awards</a>)',
-        'url'     => 'awardcase',
+        'url' => 'awardcase',
     ],
     342 => [
-        'name'    => 'Award Removal',
+        'name' => 'Award Removal',
         'message' => '{award_name} (×{award_quantity}) was removed from your awards by <a href="{sender_url}">{sender_name}</a>. (<a href="{url}">View Awards</a>)',
-        'url'     => 'awardcase',
+        'url' => 'awardcase',
     ],
     343 => [
-        'name'    => 'Award Transfer',
+        'name' => 'Award Transfer',
         'message' => 'You received {award_name} (×{award_quantity}) from <a href="{sender_url}">{sender_name}</a>. (<a href="{url}">View Awards</a>)',
-        'url'     => 'awardcase',
+        'url' => 'awardcase',
     ],
     344 => [
-        'name'    => 'Forced Award Transfer',
+        'name' => 'Forced Award Transfer',
         'message' => '{award_name} (×{award_quantity}) was transferred by <a href="{sender_url}">{sender_name}</a>.',
-        'url'     => 'awardcase',
+        'url' => 'awardcase',
     ],
     345 => [
-        'name'    => 'Character Award Grant',
+        'name' => 'Character Award Grant',
         'message' => '{character_name} received {award_name} (×{award_quantity}) from <a href="{sender_url}">{sender_name}</a>. (<a href="{url}">View Awards</a>)',
-        'url'     => 'character/{character_slug}/awards',
+        'url' => 'character/{character_slug}/awards',
     ],
     346 => [
-        'name'    => 'Character Award Removal',
+        'name' => 'Character Award Removal',
         'message' => '{award_name} (×{award_quantity}) was removed from {character_name} by <a href="{sender_url}">{sender_name}</a>. (<a href="{url}">View Awards</a>)',
-        'url'     => 'character/{character_slug}/awards',
+        'url' => 'character/{character_slug}/awards',
     ],
 
     // CHARACTER_ITEM_GRANT
@@ -468,5 +468,21 @@ return [
         'name'    => 'Gallery Submission Participant',
         'message' => '<a href="{sender_url}">{sender}</a> has added you as a participant on a gallery submission. (<a href="{url}">View Submission</a>)',
         'url'     => 'gallery/view/{submission_id}',
+    ],
+
+    1002 => [
+        'name'    => 'Gift Submission Received',
+        'message' => 'Your character (<a href="{character_url}">{character}</a>) was included in a submission by <a href="{sender_url}">{sender}</a>. (<a href="{url}">View Submission</a>)',
+        'url'     => 'submissions/view/{submission_id}',
+    ],
+    1003 => [
+        'name'    => 'Gift Claim Received',
+        'message' => 'Your character (<a href="{character_url}">{character}</a>) was included in a claim by <a href="{sender_url}">{sender}</a>. (<a href="{url}">View Claim</a>)',
+        'url'     => 'claims/view/{submission_id}',
+    ],
+    1004 => [
+        'name'    => 'Gift Submission Alert',
+        'message' => 'Your character (<a href="{character_url}">{character_name}</a>) has {count} submissions by other users. (<a href="{url}">View Submissions</a>)',
+        'url'     => '{character_url}/submissions',
     ],
 ];

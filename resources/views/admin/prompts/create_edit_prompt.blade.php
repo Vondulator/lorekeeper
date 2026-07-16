@@ -62,6 +62,11 @@
         {!! Form::textarea('description', $prompt->description, ['class' => 'form-control wysiwyg']) !!}
     </div>
 
+    <div class="form-group">
+        {!! Form::label('prompt_timeframe', 'Prompt Repeat Timeframe') !!} {!! add_help('Re-opens and closes the prompt on the same dates each month or year. Both a start and end time are required for repeating prompts.') !!}
+        {!! Form::select('prompt_timeframe', ['never' => 'Never', 'monthly' => 'Monthly', 'yearly' => 'Yearly'], $prompt->prompt_timeframe ?? 'never', ['class' => 'form-control']) !!}
+    </div>
+
     <div class="row">
         <div class="col-md-6">
             <div class="form-group">

@@ -6,6 +6,7 @@ use App\Facades\Notifications;
 use App\Facades\Settings;
 use App\Models\Award\Award;
 use App\Models\Award\AwardLog;
+use App\Models\WorldExpansion\FactionRankMember;
 use App\Models\Currency\Currency;
 use App\Models\Currency\CurrencyLog;
 use App\Models\Gallery\GalleryCharacter;
@@ -18,7 +19,6 @@ use App\Models\Submission\SubmissionCharacter;
 use App\Models\Trade;
 use App\Models\User\User;
 use App\Models\User\UserCharacterLog;
-use App\Models\WorldExpansion\FactionRankMember;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -36,7 +36,7 @@ class Character extends Model {
         'is_sellable', 'is_tradeable', 'is_giftable',
         'sale_value', 'transferrable_at', 'is_visible',
         'is_gift_art_allowed', 'is_gift_writing_allowed', 'is_trading', 'sort',
-        'is_myo_slot', 'name', 'trade_id', 'owner_url', 'home_id', 'home_changed', 'faction_id', 'faction_changed',
+        'is_myo_slot', 'name', 'trade_id', 'owner_url', 'home_id', 'home_changed', 'faction_id', 'faction_changed', 'encounter_energy',
     ];
 
     /**
@@ -53,8 +53,8 @@ class Character extends Model {
      */
     protected $casts = [
         'transferrable_at' => 'datetime',
-        'home_changed'     => 'datetime',
-        'faction_changed'  => 'datetime',
+        'home_changed' => 'datetime',
+        'faction_changed' => 'datetime',
     ];
 
     /**
@@ -497,8 +497,8 @@ class Character extends Model {
 
     public function getLocationAttribute() {
         return match ($this->homeSetting) {
-            1       => optional(optional($this->user)->home)->fullDisplayName,
-            2, 3    => optional($this->home)->fullDisplayName,
+            1 => optional(optional($this->user)->home)->fullDisplayName,
+            2, 3 => optional($this->home)->fullDisplayName,
             default => null,
         };
     }
@@ -509,8 +509,8 @@ class Character extends Model {
 
     public function getCurrentFactionAttribute() {
         return match ($this->factionSetting) {
-            1       => optional(optional($this->user)->faction)->fullDisplayName,
-            2, 3    => optional($this->faction)->fullDisplayName,
+            1 => optional(optional($this->user)->faction)->fullDisplayName,
+            2, 3 => optional($this->faction)->fullDisplayName,
             default => null,
         };
     }

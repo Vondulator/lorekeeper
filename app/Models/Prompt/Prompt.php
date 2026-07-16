@@ -14,7 +14,7 @@ class Prompt extends Model {
     protected $fillable = [
         'prompt_category_id', 'name', 'summary', 'description', 'parsed_description', 'is_active',
         'start_at', 'end_at', 'hide_before_start', 'hide_after_end', 'has_image', 'prefix',
-        'hide_submissions', 'staff_only', 'hash',
+        'hide_submissions', 'staff_only', 'hash', 'prompt_timeframe',
     ];
 
     /**
@@ -96,16 +96,29 @@ class Prompt extends Model {
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeActive($query) {
-        return $query->where('is_active', 1)
-            ->where(function ($query) {
-                $query->whereNull('start_at')->orWhere('start_at', '<', Carbon::now())->orWhere(function ($query) {
-                    $query->where('start_at', '>=', Carbon::now())->where('hide_before_start', 0);
+        $now = Carbon::now();
+
+        return $query->where('is_active', 1)->where(function ($query) use ($now) {
+            $query->where(function ($query) use ($now) {
+                $query->whereNull('prompt_timeframe')->where(function ($query) use ($now) {
+                    $query->whereNull('start_at')->orWhere('start_at', '<', $now)->orWhere(function ($query) use ($now) {
+                        $query->where('start_at', '>=', $now)->where('hide_before_start', 0);
+                    });
+                })->where(function ($query) use ($now) {
+                    $query->whereNull('end_at')->orWhere('end_at', '>', $now)->orWhere(function ($query) use ($now) {
+                        $query->where('end_at', '<=', $now)->where('hide_after_end', 0);
+                    });
                 });
-            })->where(function ($query) {
-                $query->whereNull('end_at')->orWhere('end_at', '>', Carbon::now())->orWhere(function ($query) {
-                    $query->where('end_at', '<=', Carbon::now())->where('hide_after_end', 0);
-                });
+            })->orWhere(function ($query) use ($now) {
+                $query->where('prompt_timeframe', 'monthly')
+                    ->whereDay('start_at', '<=', $now->day)
+                    ->whereDay('end_at', '>=', $now->day);
+            })->orWhere(function ($query) use ($now) {
+                $query->where('prompt_timeframe', 'yearly')
+                    ->whereRaw('(MONTH(start_at) * 100 + DAY(start_at)) <= ?', [$now->month * 100 + $now->day])
+                    ->whereRaw('(MONTH(end_at) * 100 + DAY(end_at)) >= ?', [$now->month * 100 + $now->day]);
             });
+        });
     }
 
     /**
@@ -323,5 +336,31 @@ class Prompt extends Model {
      */
     public function getAdminPowerAttribute() {
         return 'edit_data';
+    }
+
+    public function getStartAtAttribute($value) {
+        return $this->getRecurringDate($value);
+    }
+
+    public function getEndAtAttribute($value) {
+        return $this->getRecurringDate($value);
+    }
+
+    private function getRecurringDate($value) {
+        if (!$value) {
+            return null;
+        }
+
+        $date = Carbon::parse($value);
+        if ($this->prompt_timeframe === 'monthly') {
+            $year = Carbon::now()->year;
+            $month = Carbon::now()->month;
+            $date->setDate($year, $month, min($date->day, Carbon::create($year, $month, 1)->daysInMonth));
+        } elseif ($this->prompt_timeframe === 'yearly') {
+            $year = Carbon::now()->year;
+            $date->setDate($year, $date->month, min($date->day, Carbon::create($year, $date->month, 1)->daysInMonth));
+        }
+
+        return $date;
     }
 }
