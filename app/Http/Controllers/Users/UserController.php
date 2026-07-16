@@ -38,7 +38,13 @@ class UserController extends Controller {
      */
     public function __construct() {
         parent::__construct();
-        $name = Route::current()->parameter('name');
+        $route = Route::current();
+
+        if (!$route) {
+            return;
+        }
+
+        $name = $route->parameter('name');
         $this->user = User::where('name', $name)->first();
         // check previous usernames (only grab the latest change)
         if (!$this->user) {

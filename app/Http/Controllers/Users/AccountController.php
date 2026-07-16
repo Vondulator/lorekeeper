@@ -68,8 +68,8 @@ class AccountController extends Controller {
     public function getSettings() {
         return view('account.settings', [
             'links'                => Auth::user()->staffProfile,
-            'locations'            => Location::where('is_user_home', 1)->pluck('style', 'id')->toArray(),
-            'factions'             => Faction::where('is_user_faction', 1)->pluck('style', 'id')->toArray(),
+            'locations'            => Location::where('is_user_home', 1)->get()->pluck('style', 'id')->toArray(),
+            'factions'             => Faction::where('is_user_faction', 1)->get()->pluck('style', 'id')->toArray(),
             'user_enabled'         => Settings::get('WE_user_locations'),
             'user_faction_enabled' => Settings::get('WE_user_factions'),
             'char_enabled'         => Settings::get('WE_character_locations'),
