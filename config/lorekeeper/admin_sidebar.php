@@ -225,7 +225,7 @@ return [
             ],
         ],
     ],
-    'World Expanded' => [
+    'WorldExpanded' => [
         'power' => 'manage_world',
         'links' => [
             ['name' => 'Glossary', 'url' => 'admin/world/glossary'],
