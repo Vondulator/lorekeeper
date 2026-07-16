@@ -2,13 +2,12 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Weather\WeatherSeason;
-use DB;
 use Carbon\Carbon;
+use DB;
+use Illuminate\Console\Command;
 
-class change_site_season extends Command
-{
+class change_site_season extends Command {
     /**
      * The name and signature of the console command.
      *
@@ -25,11 +24,8 @@ class change_site_season extends Command
 
     /**
      * Create a new command instance.
-     *
-     * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         parent::__construct();
     }
 
@@ -38,17 +34,15 @@ class change_site_season extends Command
      *
      * @return int
      */
-    public function handle()
-    {
-       //change the season
-       $updateto = WeatherSeason::whereNotNull('cycle_at')->where('cycle_at', '<', Carbon::now())->whereNotNull('end_at')->where('end_at', '>', Carbon::now())->first();
+    public function handle() {
+        // change the season
+        $updateto = WeatherSeason::whereNotNull('cycle_at')->where('cycle_at', '<', Carbon::now())->whereNotNull('end_at')->where('end_at', '>', Carbon::now())->first();
 
-       if(isset($updateto)) {
+        if (isset($updateto)) {
             DB::table('site_settings')->where('key', 'site_season')->update(['value' => $updateto->id]);
             $this->info('Season adjusted successfully.');
         } else {
             $this->info('No seasons found!');
         }
-
     }
 }

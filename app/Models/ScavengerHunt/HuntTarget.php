@@ -2,19 +2,17 @@
 
 namespace App\Models\ScavengerHunt;
 
-use Config;
-use App\Models\Model;
 use App\Models\Item\Item;
+use App\Models\Model;
 
-class HuntTarget extends Model
-{
+class HuntTarget extends Model {
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'hunt_id', 'target', 'item_id', 'quantity', 'page_id', 'description'
+        'hunt_id', 'target', 'item_id', 'quantity', 'page_id', 'description',
     ];
 
     /**
@@ -30,8 +28,8 @@ class HuntTarget extends Model
      * @var array
      */
     public static $createRules = [
-        'item_id' => 'required',
-        'quantity' => 'required|integer|min:1',
+        'item_id'     => 'required',
+        'quantity'    => 'required|integer|min:1',
         'description' => 'nullable',
     ];
 
@@ -41,8 +39,8 @@ class HuntTarget extends Model
      * @var array
      */
     public static $updateRules = [
-        'item_id' => 'required',
-        'quantity' => 'required|integer|min:1',
+        'item_id'     => 'required',
+        'quantity'    => 'required|integer|min:1',
         'description' => 'nullable',
     ];
 
@@ -55,16 +53,14 @@ class HuntTarget extends Model
     /**
      * Get the item attached to the hunt target.
      */
-    public function item()
-    {
+    public function item() {
         return $this->belongsTo('App\Models\Item\Item', 'item_id');
     }
 
     /**
      * Get the target's parent hunt.
      */
-    public function hunt()
-    {
+    public function hunt() {
         return $this->belongsTo('App\Models\ScavengerHunt\ScavengerHunt', 'hunt_id');
     }
 
@@ -79,8 +75,7 @@ class HuntTarget extends Model
      *
      * @return string
      */
-    public function getTargetNumberAttribute()
-    {
+    public function getTargetNumberAttribute() {
         return $this->hunt->numberedTargets[$this->id] + 1;
     }
 
@@ -89,42 +84,41 @@ class HuntTarget extends Model
      *
      * @return string
      */
-    public function getTargetFieldAttribute()
-    {
-        switch($this->targetNumber) {
+    public function getTargetFieldAttribute() {
+        switch ($this->targetNumber) {
             default:
-            flash('Invalid target number.')->error();
-            break;
-        case 1:
-            return 'target_1';
-            break;
-        case 2:
-            return 'target_2';
-            break;
-        case 3:
-            return 'target_3';
-            break;
-        case 4:
-            return 'target_4';
-            break;
-        case 5:
-            return 'target_5';
-            break;
-        case 6:
-            return 'target_6';
-            break;
-        case 7:
-            return 'target_7';
-            break;
-        case 8:
-            return 'target_8';
-            break;
-        case 9:
-            return 'target_9';
-            break;
-        case 10:
-            return 'target_10';
-            break;
+                flash('Invalid target number.')->error();
+                break;
+            case 1:
+                return 'target_1';
+                break;
+            case 2:
+                return 'target_2';
+                break;
+            case 3:
+                return 'target_3';
+                break;
+            case 4:
+                return 'target_4';
+                break;
+            case 5:
+                return 'target_5';
+                break;
+            case 6:
+                return 'target_6';
+                break;
+            case 7:
+                return 'target_7';
+                break;
+            case 8:
+                return 'target_8';
+                break;
+            case 9:
+                return 'target_9';
+                break;
+            case 10:
+                return 'target_10';
+                break;
         }
     }
 
@@ -133,10 +127,12 @@ class HuntTarget extends Model
      *
      * @return string
      */
-    public function getIsClaimedAttribute()
-    {
-        if (!\Illuminate\Support\Facades\Auth::check()) return false;
+    public function getIsClaimedAttribute() {
+        if (!\Illuminate\Support\Facades\Auth::check()) {
+            return false;
+        }
         $participant = HuntParticipant::where('user_id', \Illuminate\Support\Facades\Auth::id())->where('hunt_id', $this->hunt_id)->first();
+
         return $participant && !empty($participant[$this->targetField]);
     }
 
@@ -145,11 +141,13 @@ class HuntTarget extends Model
      *
      * @return string
      */
-    public function getDisplayItemAttribute()
-    {
-		if (!$this->item) return 'Deleted Asset';
-		$image = ($this->item->imageUrl) ? '<img class="small-icon" src="'.$this->item->imageUrl.'"/>' : null;
-		return $image.' '.$this->item->displayName.' ×'.$this->attributes['quantity'];
+    public function getDisplayItemAttribute() {
+        if (!$this->item) {
+            return 'Deleted Asset';
+        }
+        $image = ($this->item->imageUrl) ? '<img class="small-icon" src="'.$this->item->imageUrl.'"/>' : null;
+
+        return $image.' '.$this->item->displayName.' ×'.$this->attributes['quantity'];
     }
 
     /**
@@ -157,10 +155,12 @@ class HuntTarget extends Model
      *
      * @return string
      */
-    public function getDisplayItemLongAttribute()
-    {
-		if (!$this->item) return 'Deleted Asset';
+    public function getDisplayItemLongAttribute() {
+        if (!$this->item) {
+            return 'Deleted Asset';
+        }
         $image = ($this->item->imageUrl) ? '<img style="max-height:150px;" src="'.$this->item->imageUrl.'" data-toggle="tooltip" title="'.$this->item->name.'"/>' : null;
+
         return $image.(isset($image) ? '<br/>' : '').' '.$this->item->displayName.' ×'.$this->attributes['quantity'];
     }
 
@@ -169,12 +169,16 @@ class HuntTarget extends Model
      *
      * @return string
      */
-    public function getDisplayItemShortAttribute()
-    {
-		if (!$this->item) return 'Deleted Asset';
+    public function getDisplayItemShortAttribute() {
+        if (!$this->item) {
+            return 'Deleted Asset';
+        }
         $image = ($this->item->imageUrl) ? '<img style="max-height:150px;" src="'.$this->item->imageUrl.'" data-toggle="tooltip" title="'.$this->item->name.'"/>' : null;
-        if(isset($image)) return $image;
-        else return $this->item->displayName;
+        if (isset($image)) {
+            return $image;
+        } else {
+            return $this->item->displayName;
+        }
     }
 
     /**
@@ -182,8 +186,7 @@ class HuntTarget extends Model
      *
      * @return string
      */
-    public function getUrlAttribute()
-    {
+    public function getUrlAttribute() {
         return url('hunts/targets/'.$this->page_id);
     }
 
@@ -192,10 +195,12 @@ class HuntTarget extends Model
      *
      * @return string
      */
-    public function getDisplayLinkAttribute()
-    {
-		if (!$this->item) return 'Deleted Asset';
+    public function getDisplayLinkAttribute() {
+        if (!$this->item) {
+            return 'Deleted Asset';
+        }
         $image = ($this->item->imageUrl) ? '<img src="'.$this->item->imageUrl.'" alt="'.$this->item->name.'" />' : $this->item->name;
+
         return '<a href="'.$this->url.'">'.$image.'</a>';
     }
 
@@ -204,11 +209,12 @@ class HuntTarget extends Model
      *
      * @return string
      */
-    public function getWikiLinkAttribute()
-    {
-		if (!$this->item) return 'Deleted Asset';
+    public function getWikiLinkAttribute() {
+        if (!$this->item) {
+            return 'Deleted Asset';
+        }
         $image = ($this->item->imageUrl) ? $this->item->imageUrl : $this->item->name;
+
         return '['.$this->url.' '.$image.']';
     }
-
 }

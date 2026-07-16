@@ -1,18 +1,14 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class CreateScavengerHuntTables extends Migration
-{
+class CreateScavengerHuntTables extends Migration {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
-    {
+    public function up() {
         Schema::create('scavenger_hunts', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
@@ -87,11 +83,8 @@ class CreateScavengerHuntTables extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
-    {
+    public function down() {
         Schema::dropIfExists('scavenger_hunts');
         Schema::dropIfExists('scavenger_targets');
         Schema::dropIfExists('scavenger_participants');

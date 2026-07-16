@@ -2,15 +2,13 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Weather\WeatherSeason;
+use Carbon\Carbon;
+use DB;
 use Illuminate\Console\Command;
 use Settings;
-use DB;
-use Carbon\Carbon;
-use App\Models\Weather\WeatherSeason;
-use App\Models\Weather\Weather;
 
-class cycle_site_weather extends Command
-{
+class cycle_site_weather extends Command {
     /**
      * The name and signature of the console command.
      *
@@ -27,11 +25,8 @@ class cycle_site_weather extends Command
 
     /**
      * Create a new command instance.
-     *
-     * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         parent::__construct();
     }
 
@@ -40,16 +35,17 @@ class cycle_site_weather extends Command
      *
      * @return int
      */
-    public function handle()
-    {
+    public function handle() {
         $currentseason = WeatherSeason::find(Settings::get('site_season'));
         $cycle = (int) Settings::get('site_weather_cycle');
         if (!$cycle) {
             $this->info('Not set to cycle weather currently. Adjust the settings if this is an error.');
+
             return self::SUCCESS;
         }
         if (!$currentseason) {
             $this->info('No valid season is set.');
+
             return self::SUCCESS;
         }
 
@@ -60,6 +56,7 @@ class cycle_site_weather extends Command
         }
         if (!$currentseason->loot()->exists()) {
             $this->info('No valid weather found!');
+
             return self::SUCCESS;
         }
 
@@ -67,11 +64,13 @@ class cycle_site_weather extends Command
         $weather = isset($results['weathers']) ? collect($results['weathers'])->first() : null;
         if (!$weather || !isset($weather['asset'])) {
             $this->info('No valid weather found!');
+
             return self::SUCCESS;
         }
 
         DB::table('site_settings')->where('key', 'site_weather')->update(['value' => $weather['asset']->id]);
         $this->info('Weather adjusted successfully.');
+
         return self::SUCCESS;
     }
 }

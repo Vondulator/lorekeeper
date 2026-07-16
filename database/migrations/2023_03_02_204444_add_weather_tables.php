@@ -4,17 +4,12 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddWeatherTables extends Migration
-{
+class AddWeatherTables extends Migration {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
-    {
-
-//types of weather, like sun, cloudy, anything else really
+    public function up() {
+        // types of weather, like sun, cloudy, anything else really
         Schema::create('weather', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
@@ -26,7 +21,7 @@ class AddWeatherTables extends Migration
             $table->boolean('has_image')->default(0);
         });
 
-        //the weather seasons, could also call them cycles i guess, it's hard to come up with a generic term for every site
+        // the weather seasons, could also call them cycles i guess, it's hard to come up with a generic term for every site
         Schema::create('weather_seasons', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
@@ -42,7 +37,7 @@ class AddWeatherTables extends Migration
             $table->boolean('has_image')->default(0);
         });
 
-        //table for outputs to roll on for the seasons
+        // table for outputs to roll on for the seasons
         Schema::create('weather_table', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
@@ -55,11 +50,8 @@ class AddWeatherTables extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
-    {
+    public function down() {
         Schema::dropIfExists('weather_table');
         Schema::dropIfExists('weather_seasons');
         Schema::dropIfExists('weather');

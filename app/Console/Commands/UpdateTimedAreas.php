@@ -2,12 +2,11 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use Carbon\Carbon;
 use App\Models\Encounter\EncounterArea;
+use Carbon\Carbon;
+use Illuminate\Console\Command;
 
-class UpdateTimedAreas extends Command
-{
+class UpdateTimedAreas extends Command {
     /**
      * The name and signature of the console command.
      *
@@ -24,11 +23,8 @@ class UpdateTimedAreas extends Command
 
     /**
      * Create a new command instance.
-     *
-     * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         parent::__construct();
     }
 
@@ -37,9 +33,8 @@ class UpdateTimedAreas extends Command
      *
      * @return int
      */
-    public function handle()
-    {
-        //activate or deactivate the areas
+    public function handle() {
+        // activate or deactivate the areas
         $now = Carbon::now();
         EncounterArea::where('is_active', 1)->whereNotNull('end_at')->where('end_at', '<=', $now)->update(['is_active' => 0]);
         EncounterArea::where('is_active', 0)

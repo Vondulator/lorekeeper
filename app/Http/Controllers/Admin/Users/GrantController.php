@@ -3,20 +3,20 @@
 namespace App\Http\Controllers\Admin\Users;
 
 use App\Http\Controllers\Controller;
+use App\Models\Award\Award;
 use App\Models\Character\Character;
 use App\Models\Character\CharacterDesignUpdate;
 use App\Models\Character\CharacterItem;
 use App\Models\Currency\Currency;
 use App\Models\Item\Item;
-use App\Models\Award\Award;
 use App\Models\Submission\Submission;
 use App\Models\Trade;
 use App\Models\User\User;
 use App\Models\User\UserItem;
-use App\Services\CurrencyManager;
-use App\Services\InventoryManager;
 use App\Services\AwardCaseManager;
+use App\Services\CurrencyManager;
 use App\Services\EncounterService;
+use App\Services\InventoryManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
@@ -24,9 +24,9 @@ use Illuminate\Support\Facades\Config;
 class GrantController extends Controller {
     public function getAwards() {
         return view('admin.grants.awards', [
-            'userOptions' => User::orderBy('id')->pluck('name', 'id'),
-            'userAwardOptions' => Award::orderBy('name')->where('is_user_owned', 1)->pluck('name', 'id'),
-            'characterOptions' => Character::myo(0)->orderBy('name')->get()->pluck('fullName', 'id'),
+            'userOptions'           => User::orderBy('id')->pluck('name', 'id'),
+            'userAwardOptions'      => Award::orderBy('name')->where('is_user_owned', 1)->pluck('name', 'id'),
+            'characterOptions'      => Character::myo(0)->orderBy('name')->get()->pluck('fullName', 'id'),
             'characterAwardOptions' => Award::orderBy('name')->where('is_character_owned', 1)->pluck('name', 'id'),
         ]);
     }

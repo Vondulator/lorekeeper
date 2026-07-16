@@ -7,8 +7,6 @@ use Illuminate\Support\Facades\Schema;
 class AddRepeatToPrompts extends Migration {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up() {
         Schema::table('prompts', function (Blueprint $table) {
@@ -18,8 +16,6 @@ class AddRepeatToPrompts extends Migration {
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down() {
         Schema::table('prompts', function (Blueprint $table) {

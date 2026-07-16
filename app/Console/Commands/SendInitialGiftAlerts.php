@@ -2,18 +2,15 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-
-use DB;
-use Notifications;
-
 use App\Models\Character\Character;
 use App\Models\Submission\Submission;
 use App\Models\Submission\SubmissionCharacter;
 use App\Models\User\User;
+use DB;
+use Illuminate\Console\Command;
+use Notifications;
 
-class SendInitialGiftAlerts extends Command
-{
+class SendInitialGiftAlerts extends Command {
     /**
      * The name and signature of the console command.
      *
@@ -30,11 +27,8 @@ class SendInitialGiftAlerts extends Command
 
     /**
      * Create a new command instance.
-     *
-     * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         parent::__construct();
     }
 
@@ -43,8 +37,7 @@ class SendInitialGiftAlerts extends Command
      *
      * @return mixed
      */
-    public function handle()
-    {
+    public function handle() {
         //
         $this->info('*****************************');
         $this->info('* Send Initial Gift Alerts *');
@@ -53,9 +46,8 @@ class SendInitialGiftAlerts extends Command
         $this->line('Retriveing Submission Characters...');
         $submissionCharacters = SubmissionCharacter::distinct()->pluck('character_id');
 
-
         $this->line('Creating Notifications...'."\n");
-        foreach($submissionCharacters as $submissionCharacter) {
+        foreach ($submissionCharacters as $submissionCharacter) {
             $characterDetails = Character::find($submissionCharacter);
             if (!$characterDetails || !$characterDetails->user_id) {
                 continue;
@@ -63,37 +55,37 @@ class SendInitialGiftAlerts extends Command
             $characterOwnerId = $characterDetails->user_id;
             $notificationData = DB::table('notifications')->where('user_id', $characterOwnerId)->where('notification_type_id', 1004)->pluck('data');
 
-            //get the character each notif is for
-            $notificationCharacter = array();
-            foreach($notificationData as $data) {
+            // get the character each notif is for
+            $notificationCharacter = [];
+            foreach ($notificationData as $data) {
                 $decoded = json_decode($data);
                 if (isset($decoded->character_id)) {
                     $notificationCharacter[] = $decoded->character_id;
                 }
             }
 
-            //get only gift submissions
+            // get only gift submissions
             $submissionIds = SubmissionCharacter::where('character_id', $submissionCharacter)->pluck('submission_id');
             $giftSubmissionCount = 0;
             foreach ($submissionIds as $id) {
-                $add = Submission::where('id', $id)->where('user_id', '!=' , $characterOwnerId)->where('status', 'Approved')->count();
+                $add = Submission::where('id', $id)->where('user_id', '!=', $characterOwnerId)->where('status', 'Approved')->count();
                 $giftSubmissionCount += $add;
             }
 
             $excludesSubmissionCharacter = !in_array($submissionCharacter, $notificationCharacter);
 
-            //create or skip notification
-            if($excludesSubmissionCharacter && $giftSubmissionCount != 0) {
+            // create or skip notification
+            if ($excludesSubmissionCharacter && $giftSubmissionCount != 0) {
                 $characterOwnerData = User::find($characterOwnerId);
                 if (!$characterOwnerData) {
                     continue;
                 }
 
                 Notifications::create('GIFT_SUBMISSION_ALERT', $characterOwnerData, [
-                    'character_id' => $submissionCharacter,
-                    'character_url' => $characterDetails->url,
-                    'character_name' => $characterDetails->slug . ($characterDetails->name ? ': '.$characterDetails->name : ''),
-                    'count' => $giftSubmissionCount,
+                    'character_id'   => $submissionCharacter,
+                    'character_url'  => $characterDetails->url,
+                    'character_name' => $characterDetails->slug.($characterDetails->name ? ': '.$characterDetails->name : ''),
+                    'count'          => $giftSubmissionCount,
                 ]);
             }
         }

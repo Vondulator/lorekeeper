@@ -12,8 +12,8 @@ use App\Models\Trade;
 use App\Models\TradeListing;
 use App\Models\User\User;
 use App\Models\User\UserItem;
-use App\Services\TradeManager;
 use App\Services\TradeListingManager;
+use App\Services\TradeManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -311,14 +311,14 @@ class TradeController extends Controller {
 
     public function getListingIndex() {
         return view('home.trades.listings.index', [
-            'listings'       => TradeListing::active()->orderByDesc('id')->paginate(10),
+            'listings'        => TradeListing::active()->orderByDesc('id')->paginate(10),
             'listingDuration' => Settings::get('trade_listing_duration'),
         ]);
     }
 
     public function getExpiredListings() {
         return view('home.trades.listings.expired', [
-            'listings'       => TradeListing::expired()->where('user_id', Auth::id())->orderByDesc('id')->paginate(10),
+            'listings'        => TradeListing::expired()->where('user_id', Auth::id())->orderByDesc('id')->paginate(10),
             'listingDuration' => Settings::get('trade_listing_duration'),
         ]);
     }
