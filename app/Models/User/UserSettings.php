@@ -12,7 +12,7 @@ class UserSettings extends Model {
      */
     protected $fillable = [
         'is_fto', 'submission_count', 'banned_at', 'ban_reason', 'birthday_setting',
-        'deactivate_reason', 'deactivated_at',
+        'deactivate_reason', 'deactivated_at', 'encounter_energy', 'encounter_character_id', 'hol_plays',
     ];
 
     /**
@@ -50,5 +50,9 @@ class UserSettings extends Model {
      */
     public function user() {
         return $this->belongsTo(User::class);
+    }
+
+    public function encounterCharacter() {
+        return $this->belongsTo(\App\Models\Character\Character::class, 'encounter_character_id');
     }
 }

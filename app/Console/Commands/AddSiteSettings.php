@@ -85,6 +85,12 @@ class AddSiteSettings extends Command {
 
         $this->addSiteSetting('comment_dislikes_enabled', 0, '0: Dislikes disabled, 1: Dislikes enabled.');
 
+        $this->addSiteSetting('encounter_energy', 5, 'Amount of encounter energy restored daily.');
+        $this->addSiteSetting('site_season', 0, 'ID of the season the site is currently experiencing.');
+        $this->addSiteSetting('site_weather', 0, 'ID of the weather the site is currently experiencing.');
+        $this->addSiteSetting('site_weather_cycle', 0, '0: disabled, 1: daily, 2: weekly, 3: monthly.');
+        $this->addSiteSetting('trade_listing_duration', 14, 'Number of days a trade listing remains active.');
+
         $this->line("\nSite settings up to date!");
     }
 

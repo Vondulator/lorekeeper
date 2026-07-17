@@ -4,6 +4,10 @@
     Home
 @endsection
 
+@section('sidebar')
+    @include('widgets._current_weather')
+@endsection
+
 @section('content')
     @if (Auth::check())
         @include('pages._dashboard')

@@ -5,6 +5,9 @@
                 href="{{ $trade->url }} ">Trade (#{{ $trade->id }})</a></h2>
     </div>
     <div class="card-body">
+        @if ($trade->terms_link)
+            <p><strong>Proof of Terms:</strong> <a href="{{ $trade->terms_link }}" rel="nofollow noreferrer">{{ $trade->terms_link }}</a></p>
+        @endif
         @if ($trade->comments)
             <div>{!! nl2br(htmlentities($trade->comments)) !!}</div>
             <hr />

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Facades\Settings;
 use App\Models\Award\Award;
 use App\Models\Award\AwardCategory;
 use App\Models\Character\CharacterCategory;
@@ -17,6 +18,8 @@ use App\Models\Shop\Shop;
 use App\Models\Species\Species;
 use App\Models\Species\Subtype;
 use App\Models\User\User;
+use App\Models\Weather\Weather;
+use App\Models\Weather\WeatherSeason;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -527,6 +530,31 @@ class WorldController extends Controller {
 
         return view('world.collection_categories', [
             'categories' => $query->orderByDesc('sort')->paginate(20)->appends($request->query()),
+        ]);
+    }
+
+    public function getSeasons(Request $request) {
+        $query = WeatherSeason::visible();
+        if ($request->filled('name')) {
+            $query->where('name', 'LIKE', '%'.$request->input('name').'%');
+        }
+
+        return view('world.seasons', ['seasons' => $query->orderBy('name')->paginate(20)->appends($request->query())]);
+    }
+
+    public function getWeather(Request $request) {
+        $query = Weather::visible();
+        if ($request->filled('name')) {
+            $query->where('name', 'LIKE', '%'.$request->input('name').'%');
+        }
+
+        return view('world.weathers', ['weathers' => $query->orderBy('name')->paginate(20)->appends($request->query())]);
+    }
+
+    public function getForecast() {
+        return view('world.forecast', [
+            'weather' => Weather::find(Settings::get('site_weather')),
+            'season'  => WeatherSeason::find(Settings::get('site_season')),
         ]);
     }
 }

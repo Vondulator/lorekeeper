@@ -85,6 +85,12 @@ Route::group(['prefix' => 'bank', 'namespace' => 'Users'], function () {
 });
 
 Route::group(['prefix' => 'trades', 'namespace' => 'Users'], function () {
+    Route::get('listings', 'TradeController@getListingIndex');
+    Route::get('listings/expired', 'TradeController@getExpiredListings');
+    Route::get('listings/create', 'TradeController@getCreateListing');
+    Route::post('listings/create', 'TradeController@postCreateListing');
+    Route::get('listings/{id}', 'TradeController@getListing')->where('id', '[0-9]+');
+    Route::post('listings/{id}/expire', 'TradeController@postExpireListing')->where('id', '[0-9]+');
     Route::get('{status}', 'TradeController@getIndex')->where('status', 'open|pending|completed|rejected|canceled');
     Route::get('create', 'TradeController@getCreateTrade');
     Route::get('{id}/edit', 'TradeController@getEditTrade')->where('id', '[0-9]+');
@@ -156,6 +162,7 @@ Route::group(['prefix' => 'submissions', 'namespace' => 'Users'], function () {
     Route::get('/', 'SubmissionController@getIndex');
     Route::get('new', 'SubmissionController@getNewSubmission');
     Route::get('new/character/{slug}', 'SubmissionController@getCharacterInfo');
+    Route::get('new/character-permissions/{slug}', 'SubmissionController@getCharacterPermissions');
     Route::get('new/prompt/{id}', 'SubmissionController@getPromptInfo');
     Route::post('new', 'SubmissionController@postNewSubmission');
     Route::post('new/{draft}', 'SubmissionController@postNewSubmission')->where('draft', 'draft');
@@ -258,4 +265,23 @@ Route::group(['prefix' => 'foraging', 'namespace' => 'Users'], function () {
     Route::post('/forage/{id}', 'ForagingController@postForage');
     Route::post('/claim', 'ForagingController@postClaim');
     Route::post('edit/character', 'ForagingController@postEditCharacter');
+});
+
+Route::group(['prefix' => 'encounter-areas'], function () {
+    Route::get('/', 'EncounterController@getEncounterAreas');
+    Route::get('{id}', 'EncounterController@exploreArea')->where('id', '[0-9]+');
+    Route::post('{id}/act', 'EncounterController@postAct')->where('id', '[0-9]+');
+    Route::post('select-character', 'EncounterController@postSelectCharacter');
+});
+
+Route::group(['prefix' => 'higher-or-lower'], function () {
+    Route::get('/', 'HolController@getIndex');
+    Route::get('play', 'HolController@playHol');
+    Route::post('play/guess', 'HolController@postGuess');
+});
+
+Route::group(['prefix' => 'hunts'], function () {
+    Route::get('{id}', 'HuntController@getHunt');
+    Route::get('targets/{pageId}', 'HuntController@getTarget');
+    Route::post('targets/claim', 'HuntController@postClaimTarget');
 });

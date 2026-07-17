@@ -350,6 +350,8 @@ Route::group(['prefix' => 'grants', 'namespace' => 'Users', 'middleware' => 'pow
     Route::get('item-search', 'GrantController@getItemSearch');
     Route::get('awards', 'GrantController@getAwards');
     Route::post('awards', 'GrantController@postAwards');
+    Route::get('encounter-energy', 'GrantController@getEncounterEnergyGrants');
+    Route::post('encounter-energy', 'GrantController@postEncounterEnergyGrant');
 });
 
 // MASTERLIST
@@ -646,4 +648,59 @@ Route::group(['prefix' => 'world',  'namespace' => 'World', 'middleware' => 'pow
     Route::post('glossary/edit/{id}', 'GlossaryController@postCreateEditTerm');
     Route::get('glossary/delete/{id}', 'GlossaryController@getDeleteTerm');
     Route::post('glossary/delete/{id}', 'GlossaryController@postDeleteTerm');
+});
+
+Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:edit_data'], function () {
+    Route::get('encounters', 'EncounterController@getEncounterIndex');
+    Route::get('encounters/create', 'EncounterController@getCreateEncounter');
+    Route::get('encounters/edit/{id}', 'EncounterController@getEditEncounter');
+    Route::get('encounters/delete/{id}', 'EncounterController@getDeleteEncounter');
+    Route::post('encounters/create', 'EncounterController@postCreateEditEncounter');
+    Route::post('encounters/edit/{id?}', 'EncounterController@postCreateEditEncounter');
+    Route::post('encounters/delete/{id}', 'EncounterController@postDeleteEncounter');
+    Route::get('encounters/edit/{encounter_id}/prompts/create', 'EncounterController@getCreateEditPrompt');
+    Route::get('encounters/edit/{encounter_id}/prompts/edit/{id}', 'EncounterController@getCreateEditPrompt');
+    Route::post('encounters/edit/{encounter_id}/prompts/create', 'EncounterController@postCreateEditPrompt');
+    Route::post('encounters/edit/{encounter_id}/prompts/edit/{id}', 'EncounterController@postCreateEditPrompt');
+    Route::get('encounters/areas', 'EncounterController@getEncounterAreaIndex');
+    Route::get('encounters/areas/create', 'EncounterController@getCreateEncounterArea');
+    Route::get('encounters/areas/edit/{id}', 'EncounterController@getEditEncounterArea');
+    Route::get('encounters/areas/delete/{id}', 'EncounterController@getDeleteEncounterArea');
+    Route::post('encounters/areas/create', 'EncounterController@postCreateEditEncounterArea');
+    Route::post('encounters/areas/edit/{id?}', 'EncounterController@postCreateEditEncounterArea');
+    Route::post('encounters/areas/delete/{id}', 'EncounterController@postDeleteEncounterArea');
+    Route::get('encounters/areas/roll/{id}', 'EncounterController@getRollArea');
+    Route::post('encounters/areas/restrictions/{id}', 'EncounterController@postRestrictArea');
+
+    Route::get('hunts', 'HuntController@getHuntIndex');
+    Route::get('hunts/create', 'HuntController@getCreateHunt');
+    Route::get('hunts/edit/{id}', 'HuntController@getEditHunt');
+    Route::get('hunts/delete/{id}', 'HuntController@getDeleteHunt');
+    Route::post('hunts/create', 'HuntController@postCreateEditHunt');
+    Route::post('hunts/edit/{id?}', 'HuntController@postCreateEditHunt');
+    Route::post('hunts/delete/{id}', 'HuntController@postDeleteHunt');
+    Route::get('hunts/targets/create/{id}', 'HuntController@getCreateHuntTarget');
+    Route::post('hunts/targets/create', 'HuntController@postCreateEditHuntTarget');
+    Route::get('hunts/targets/edit/{id}', 'HuntController@getEditHuntTarget');
+    Route::post('hunts/targets/edit/{id}', 'HuntController@postCreateEditHuntTarget');
+    Route::get('hunts/targets/delete/{id}', 'HuntController@getDeleteHuntTarget');
+    Route::post('hunts/targets/delete/{id}', 'HuntController@postDeleteHuntTarget');
+});
+
+Route::group(['prefix' => 'weather', 'namespace' => 'Data', 'middleware' => 'power:edit_data'], function () {
+    Route::get('seasons', 'WeatherController@getIndex');
+    Route::get('seasons/create', 'WeatherController@getCreateSeason');
+    Route::get('seasons/edit/{id}', 'WeatherController@getEditSeason');
+    Route::get('seasons/delete/{id}', 'WeatherController@getDeleteSeason');
+    Route::get('seasons/roll/{id}', 'WeatherController@getRollSeason');
+    Route::post('seasons/create', 'WeatherController@postCreateEditSeason');
+    Route::post('seasons/edit/{id?}', 'WeatherController@postCreateEditSeason');
+    Route::post('seasons/delete/{id}', 'WeatherController@postDeleteSeason');
+    Route::get('weathers', 'WeatherController@getWeatherIndex');
+    Route::get('weathers/create', 'WeatherController@getCreateWeather');
+    Route::get('weathers/edit/{id}', 'WeatherController@getEditWeather');
+    Route::get('weathers/delete/{id}', 'WeatherController@getDeleteWeather');
+    Route::post('weathers/create', 'WeatherController@postCreateEditWeather');
+    Route::post('weathers/edit/{id?}', 'WeatherController@postCreateEditWeather');
+    Route::post('weathers/delete/{id}', 'WeatherController@postDeleteWeather');
 });

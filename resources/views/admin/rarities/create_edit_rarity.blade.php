@@ -23,6 +23,20 @@
     </div>
 
     <div class="form-group">
+        {!! Form::label('Rarity Icon (Optional)') !!} {!! add_help('Displays next to the rarity name. Use a small PNG icon.') !!}
+        <div class="custom-file">
+            {!! Form::label('icon', 'Choose file...', ['class' => 'custom-file-label']) !!}
+            {!! Form::file('icon', ['class' => 'custom-file-input']) !!}
+        </div>
+        @if ($rarity->has_icon)
+            <div class="form-check">
+                {!! Form::checkbox('remove_icon', 1, false, ['class' => 'form-check-input']) !!}
+                {!! Form::label('remove_icon', 'Remove current icon', ['class' => 'form-check-label']) !!}
+            </div>
+        @endif
+    </div>
+
+    <div class="form-group">
         {!! Form::label('Colour (Hex code; optional)') !!}
         <div class="input-group cp">
             {!! Form::text('color', $rarity->color, ['class' => 'form-control']) !!}

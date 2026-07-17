@@ -116,6 +116,10 @@ return [
                 'name' => 'Award Grants',
                 'url'  => 'admin/grants/awards',
             ],
+            [
+                'name' => 'Encounter Energy Grants',
+                'url'  => 'admin/grants/encounter-energy',
+            ],
         ],
     ],
     'Foraging' => [
@@ -223,6 +227,11 @@ return [
                 'name' => 'Collections',
                 'url'  => 'admin/data/collections',
             ],
+            ['name' => 'Encounters', 'url' => 'admin/data/encounters'],
+            ['name' => 'Encounter Areas', 'url' => 'admin/data/encounters/areas'],
+            ['name' => 'Scavenger Hunts', 'url' => 'admin/data/hunts'],
+            ['name' => 'Weather', 'url' => 'admin/weather/weathers'],
+            ['name' => 'Seasons', 'url' => 'admin/weather/seasons'],
         ],
     ],
     'WorldExpanded' => [

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Facades\Notifications;
 use App\Facades\Settings;
 use App\Models\Award\Award;
+use App\Models\Award\Award;
 use App\Models\Character\Character;
 use App\Models\Currency\Currency;
 use App\Models\Item\Item;
@@ -461,6 +462,7 @@ class SubmissionManager extends Service {
                     'character_id'  => $c->id,
                     'submission_id' => $submission->id,
                     'data'          => json_encode(getDataReadyAssets($assets)),
+                    'notify_owner'  => !empty($data['character_notify_owner'][$c->id]),
                 ]);
             }
 
@@ -497,6 +499,20 @@ class SubmissionManager extends Service {
                 'staff_name'    => $user->name,
                 'submission_id' => $submission->id,
             ]);
+
+            $submission->load('characters.character.user');
+            foreach ($submission->characters->where('notify_owner', true) as $submissionCharacter) {
+                $character = $submissionCharacter->character;
+                if ($character->user && $character->user_id != $submission->user_id) {
+                    Notifications::create($submission->prompt_id ? 'GIFT_SUBMISSION_RECEIVED' : 'GIFT_CLAIM_RECEIVED', $character->user, [
+                        'sender'        => $submission->user->name,
+                        'sender_url'    => $submission->user->url,
+                        'character_url' => $character->url,
+                        'character'     => $character->fullName,
+                        'submission_id' => $submission->id,
+                    ]);
+                }
+            }
 
             if (!$this->logAdminAction($user, 'Submission Approved', 'Approved submission <a href="'.$submission->viewurl.'">#'.$submission->id.'</a>')) {
                 throw new \Exception('Failed to log admin action.');
@@ -813,6 +829,7 @@ class SubmissionManager extends Service {
                 'character_id'  => $c->id,
                 'submission_id' => $submission->id,
                 'data'          => json_encode(getDataReadyAssets($assets)),
+                'notify_owner'  => !empty($data['character_notify_owner'][$c->id]),
             ]);
         }
 

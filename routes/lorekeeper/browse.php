@@ -240,4 +240,8 @@ Route::group(['prefix' => 'world', 'namespace' => 'WorldExpansion'], function ()
     Route::get('concepts/{id}', 'ConceptController@getConcept');
     Route::get('concept-categories', 'ConceptController@getConceptCategories');
     Route::get('concept-categories/{id}', 'ConceptController@getConceptCategory');
+
+    Route::get('seasons', 'WorldController@getSeasons');
+    Route::get('weathers', 'WorldController@getWeather');
+    Route::get('forecast', 'WorldController@getForecast');
 });

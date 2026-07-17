@@ -469,4 +469,20 @@ return [
         'message' => '<a href="{sender_url}">{sender}</a> has added you as a participant on a gallery submission. (<a href="{url}">View Submission</a>)',
         'url'     => 'gallery/view/{submission_id}',
     ],
+
+    1002 => [
+        'name'    => 'Gift Submission Received',
+        'message' => 'Your character (<a href="{character_url}">{character}</a>) was included in a submission by <a href="{sender_url}">{sender}</a>. (<a href="{url}">View Submission</a>)',
+        'url'     => 'submissions/view/{submission_id}',
+    ],
+    1003 => [
+        'name'    => 'Gift Claim Received',
+        'message' => 'Your character (<a href="{character_url}">{character}</a>) was included in a claim by <a href="{sender_url}">{sender}</a>. (<a href="{url}">View Claim</a>)',
+        'url'     => 'claims/view/{submission_id}',
+    ],
+    1004 => [
+        'name'    => 'Gift Submission Alert',
+        'message' => 'Your character (<a href="{character_url}">{character_name}</a>) has {count} submissions by other users. (<a href="{url}">View Submissions</a>)',
+        'url'     => '{character_url}/submissions',
+    ],
 ];

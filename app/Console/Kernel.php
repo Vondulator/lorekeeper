@@ -33,6 +33,11 @@ class Kernel extends ConsoleKernel {
             ->daily();
         $schedule->command('update-timed-daily')
             ->everyMinute();
+        $schedule->command('refresh-encounter-energy')->daily();
+        $schedule->command('update-timed-areas')->everyMinute();
+        $schedule->command('reset-hol')->daily();
+        $schedule->command('cycle-site-weather')->daily();
+        $schedule->command('change-site-season')->everyMinute();
     }
 
     /**

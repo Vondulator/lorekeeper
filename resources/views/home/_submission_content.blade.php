@@ -112,7 +112,12 @@
                 <div class="submission-character-info card ml-2">
                     <div class="card-body">
                         <div class="submission-character-info-content">
-                            <h3 class="mb-2 submission-character-info-header"><a href="{{ $character->character->url }}">{{ $character->character->fullName }}</a></h3>
+                            <h3 class="mb-2 submission-character-info-header">
+                                <a href="{{ $character->character->url }}">{{ $character->character->fullName }}</a>
+                                @if ($character->notify_owner)
+                                    <i class="fas fa-envelope-open-text float-right" title="The owner {{ $submission->status == 'Pending' ? 'will be' : 'was' }} notified about this gift submission."></i>
+                                @endif
+                            </h3>
                             <div class="submission-character-info-body">
                                 @if (array_filter(parseAssetData($character->data)))
                                     <table class="table table-sm mb-0">

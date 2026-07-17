@@ -15,9 +15,11 @@ use App\Models\User\User;
 use App\Models\User\UserItem;
 use App\Services\AwardCaseManager;
 use App\Services\CurrencyManager;
+use App\Services\EncounterService;
 use App\Services\InventoryManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
 
 class GrantController extends Controller {
     public function getAwards() {
@@ -139,5 +141,28 @@ class GrantController extends Controller {
             'trades'         => $item ? $trades : null,
             'submissions'    => $item ? $submissions : null,
         ]);
+    }
+
+    public function getEncounterEnergyGrants() {
+        if (!Config::get('lorekeeper.encounters.use_energy')) {
+            abort(404);
+        }
+
+        return view('admin.grants.encounters', [
+            'users'            => User::orderBy('id')->pluck('name', 'id'),
+            'characterOptions' => Character::myo(0)->orderBy('name')->get()->pluck('fullName', 'id'),
+        ]);
+    }
+
+    public function postEncounterEnergyGrant(Request $request, EncounterService $service) {
+        if ($service->grantEncounterEnergy($request->only(['names', 'quantity', 'character_names']), Auth::user())) {
+            flash('Energy granted successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->back();
     }
 }
